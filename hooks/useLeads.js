@@ -1,6 +1,6 @@
 /**
  * useLeads.js — SWR hook for fetching and mutating leads.
- * Used in center and subcenter panels.
+ * Supports Super Admin inline status/ADM status updates and type updates.
  */
 "use client";
 import useSWR from "swr";
@@ -32,7 +32,12 @@ export function useLeads(role, filters = {}) {
   );
 
   const addLead = useCallback(async (leadData) => {
-    const POST_URL = role === "subcenter" ? "/api/subcenter/leads" : "/api/center/leads";
+    const POST_URL =
+      role === "admin"
+        ? "/api/admin/leads"
+        : role === "subcenter"
+        ? "/api/subcenter/leads"
+        : "/api/center/leads";
     const res = await fetch(POST_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -44,22 +49,51 @@ export function useLeads(role, filters = {}) {
     return json.data;
   }, [role, mutate]);
 
-  const updateLeadStatus = useCallback(async (leadId, status) => {
-    const res = await fetch(`/api/center/leads/${leadId}`, {
+  // Super Admin: Update Status
+  const updateStatus = useCallback(async (leadId, status) => {
+    const res = await fetch(`/api/admin/leads/${leadId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "status", status }),
     });
-    if (!res.ok) throw new Error("Failed to update status");
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error ?? "Failed to update status");
     await mutate();
   }, [mutate]);
+
+  // Super Admin: Update ADM Status
+  const updateAdmStatus = useCallback(async (leadId, admStatus) => {
+    const res = await fetch(`/api/admin/leads/${leadId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "adm", admStatus }),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error ?? "Failed to update ADM status");
+    await mutate();
+  }, [mutate]);
+
+  // Update Type (Automation or Backend / Super Admin)
+  const updateType = useCallback(async (leadId, leadType) => {
+    const endpoint = role === "admin" ? `/api/admin/leads/${leadId}` : `/api/center/leads/${leadId}`;
+    const res = await fetch(endpoint, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "type", leadType }),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error ?? "Failed to update lead type");
+    await mutate();
+  }, [role, mutate]);
 
   return {
     leads:            data ?? [],
     isLoading,
     isError:          !!error,
     addLead,
-    updateLeadStatus,
+    updateStatus,
+    updateAdmStatus,
+    updateType,
     refresh:          mutate,
   };
 }

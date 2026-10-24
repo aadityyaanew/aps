@@ -9,12 +9,20 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import AddLeadForm from "./AddLeadForm";
 
-const EMPTY = { studentName: "", phone: "", email: "", universityId: "", courseId: "", notes: "" };
+const EMPTY = {
+  studentName: "",
+  phone: "",
+  email: "",
+  universityId: "",
+  courseId: "",
+  centerId: "",
+  notes: "",
+};
 
-export default function AddLeadDialog({ open, onClose, onSubmit }) {
-  const [values, setValues]   = useState(EMPTY);
+export default function AddLeadDialog({ open, onClose, onSubmit, isAdmin = false }) {
+  const [values, setValues] = useState(EMPTY);
   const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState("");
+  const [error, setError] = useState("");
 
   async function handleSubmit() {
     if (!values.studentName || !values.phone) {
@@ -47,13 +55,19 @@ export default function AddLeadDialog({ open, onClose, onSubmit }) {
           <DialogTitle>Add New Lead</DialogTitle>
         </DialogHeader>
 
-        <AddLeadForm values={values} onChange={setValues} />
+        <AddLeadForm values={values} onChange={setValues} isAdmin={isAdmin} />
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {error && <p className="text-sm font-medium text-red-600">{error}</p>}
 
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={handleClose} disabled={loading}>Cancel</Button>
-          <Button onClick={handleSubmit} disabled={loading} className="bg-[#8B0000] hover:bg-[#a01515] text-white">
+          <Button variant="outline" onClick={handleClose} disabled={loading}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={loading}
+            className="bg-[#800000] hover:bg-[#6c0000] text-white"
+          >
             {loading && <Loader2 size={14} className="mr-2 animate-spin" />}
             Add Lead
           </Button>

@@ -1,22 +1,43 @@
 /**
  * leads.service.js — Business logic for lead management.
- * Enforces rules like duplicate detection, status transitions.
+ * Enforces rules for Lead Type, Status, and ADM Status.
  */
 import * as leadsRepo from "@/repositories/leads.repo";
+import { LEAD_STATUS, ADM_STATUS, LEAD_TYPE } from "@/config/lead-status";
 
 /**
- * Add a new lead, with duplicate detection.
- * Returns { lead } on success or { error } string on duplicate.
+ * Add a new lead.
+ * Type rule:
+ * - Default should be "Under Review"
+ * - If lead already exists (duplicate phone in same center/system) -> "Duplicate"
+ * - If missing university or API error -> "Under Review"
+ * - If lead is pushed with valid university -> "Primary" (or can be updated by automation/backend)
  */
 export async function addLead(data) {
-  const { phone, centerId } = data;
+  const { phone, centerId, universityId, leadType: customType } = data;
 
+  let computedType = customType || "Under Review";
+
+  // Check duplicate
   const duplicate = await leadsRepo.findDuplicate(phone, centerId);
+  const validUniId = universityId ? parseInt(universityId, 10) : null;
+
   if (duplicate) {
-    // Mark as secondary instead of rejecting
-    return leadsRepo.createLead({ ...data, leadType: "secondary" });
+    computedType = "Duplicate";
+  } else if (!customType) {
+    if (!validUniId || validUniId <= 0) {
+      computedType = "Under Review";
+    } else {
+      computedType = "Primary";
+    }
   }
-  return leadsRepo.createLead({ ...data, leadType: "primary" });
+
+  return leadsRepo.createLead({
+    ...data,
+    leadType: computedType,
+    status: "New Lead",
+    admStatus: "Pending",
+  });
 }
 
 /** Get leads for admin — all leads with optional filters */
@@ -34,18 +55,28 @@ export async function getSubcenterLeads(subcenterId, filters) {
   return leadsRepo.findBySubcenter(subcenterId, filters);
 }
 
-/** Update lead status (with basic validation) */
+/** Update lead status (Only edited by Super Admin) */
 export async function updateLeadStatus(leadId, status) {
-  const valid = ["new", "contacted", "application_submitted", "admitted", "rejected"];
-  if (!valid.includes(status)) throw new Error("Invalid status");
+  if (!LEAD_STATUS[status]) {
+    throw new Error(`Invalid status: ${status}`);
+  }
   return leadsRepo.updateStatus(leadId, status);
 }
 
-/** Update ADM status */
+/** Update ADM status (Only edited by Super Admin) */
 export async function updateAdmStatus(leadId, admStatus) {
-  const valid = ["pending", "approved", "rejected"];
-  if (!valid.includes(admStatus)) throw new Error("Invalid ADM status");
+  if (!ADM_STATUS[admStatus]) {
+    throw new Error(`Invalid ADM status: ${admStatus}`);
+  }
   return leadsRepo.updateAdmStatus(leadId, admStatus);
+}
+
+/** Update lead type (e.g. by automation push or backend) */
+export async function updateLeadType(leadId, leadType) {
+  if (!LEAD_TYPE[leadType]) {
+    throw new Error(`Invalid lead type: ${leadType}`);
+  }
+  return leadsRepo.updateLeadType(leadId, leadType);
 }
 
 /** Update full lead details */
@@ -53,7 +84,7 @@ export async function updateLead(leadId, data) {
   return leadsRepo.updateLead(leadId, data);
 }
 
-/** Get dashboard stats (total, primary, secondary, admitted, rejected) */
+/** Get dashboard stats */
 export async function getDashboardStats(centerId = null) {
   return leadsRepo.countStats(centerId);
 }

@@ -21,7 +21,7 @@ export default function AdminDashboard() {
     { label: "Total Centers",    value: centers?.length    ?? 0, icon: Building2,    color: "crimson", description: "Active center accounts"   },
     { label: "Total Sub Centers",value: subcenters?.length ?? 0, icon: Users,        color: "blue",    description: "Across all centers"         },
     { label: "Total Leads",      value: leads?.length      ?? 0, icon: ClipboardList, color: "green",  description: "All student applications"   },
-    { label: "Admitted",         value: leads?.filter((l) => l.status === "admitted").length ?? 0, icon: TrendingUp, color: "purple", description: "Successfully admitted" },
+    { label: "Admission Approved", value: leads?.filter((l) => l.status === "Admission Approved").length ?? 0, icon: TrendingUp, color: "purple", description: "Successfully admitted" },
   ];
 
   return (

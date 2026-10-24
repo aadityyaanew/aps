@@ -66,11 +66,28 @@ export async function findDuplicate(phone, centerId) {
 }
 
 /** Create a new lead */
-export async function createLead({ studentName, email, phone, universityId, courseId, centerId, subcenterId, leadType, notes }) {
+export async function createLead({ studentName, email, phone, universityId, courseId, centerId, subcenterId, leadType, status, admStatus, notes }) {
+  const parsedUni = universityId ? parseInt(universityId, 10) : null;
+  const parsedCourse = courseId ? parseInt(courseId, 10) : null;
+  const parsedCenter = parseInt(centerId, 10);
+  const parsedSubcenter = subcenterId ? parseInt(subcenterId, 10) : null;
+
   const result = await execute(
-    `INSERT INTO leads (student_name, email, phone, university_id, course_id, center_id, subcenter_id, lead_type, notes)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [studentName, email ?? null, phone, universityId ?? null, courseId ?? null, centerId, subcenterId ?? null, leadType ?? "primary", notes ?? null]
+    `INSERT INTO leads (student_name, email, phone, university_id, course_id, center_id, subcenter_id, lead_type, status, adm_status, notes)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      studentName,
+      email && email.trim() ? email.trim() : null,
+      phone,
+      Number.isInteger(parsedUni) && parsedUni > 0 ? parsedUni : null,
+      Number.isInteger(parsedCourse) && parsedCourse > 0 ? parsedCourse : null,
+      parsedCenter,
+      Number.isInteger(parsedSubcenter) && parsedSubcenter > 0 ? parsedSubcenter : null,
+      leadType ?? "Under Review",
+      status ?? "New Lead",
+      admStatus ?? "Pending",
+      notes && notes.trim() ? notes.trim() : null,
+    ]
   );
   return result.insertId;
 }
@@ -83,6 +100,11 @@ export async function updateStatus(id, status) {
 /** Update ADM status */
 export async function updateAdmStatus(id, admStatus) {
   return execute(`UPDATE leads SET adm_status=?, updated_at=NOW() WHERE id=?`, [admStatus, id]);
+}
+
+/** Update lead type (e.g. by automation or backend) */
+export async function updateLeadType(id, leadType) {
+  return execute(`UPDATE leads SET lead_type=?, updated_at=NOW() WHERE id=?`, [leadType, id]);
 }
 
 /** Full lead update */
@@ -101,10 +123,11 @@ export async function countStats(centerId = null) {
   return queryOne(
     `SELECT
        COUNT(*) AS total,
-       SUM(lead_type='primary')   AS primary_leads,
-       SUM(lead_type='secondary') AS secondary_leads,
-       SUM(status='admitted')     AS admitted,
-       SUM(status='rejected')     AS rejected
+       SUM(lead_type='Primary')      AS primary_leads,
+       SUM(lead_type='Duplicate')    AS duplicate_leads,
+       SUM(lead_type='Under Review') AS under_review_leads,
+       SUM(status='Admission Approved') AS admitted,
+       SUM(status='Admission Rejected') AS rejected
      FROM leads ${where}`,
     params
   );

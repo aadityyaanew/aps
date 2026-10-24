@@ -38,10 +38,14 @@ INSERT IGNORE INTO courses (id, university_id, name, duration, fees) VALUES
 (7, 4, 'Bachelor of Business Administration (BBA)', '3 Years', 110000),
 (8, 5, 'Master of Technology (M.Tech)', '2 Years', 200000);
 
--- Sample Leads
-INSERT IGNORE INTO leads (student_name, email, phone, university_id, course_id, center_id, subcenter_id, lead_type, status, adm_status) VALUES
-('Ravi Teja',    'ravi@example.com',   '9000000001', 1, 1, 2, 3, 'primary',   'new',                   'pending'),
-('Pooja Singh',  'pooja@example.com',  '9000000002', 2, 3, 2, 3, 'primary',   'contacted',             'pending'),
-('Aman Khan',    'aman@example.com',   '9000000003', 3, 5, 2, 3, 'secondary', 'application_submitted', 'approved'),
-('Neha Gupta',   'neha@example.com',   '9000000004', 4, 7, 2, 3, 'primary',   'admitted',              'approved'),
-('Vikas Nair',   'vikas@example.com',  '9000000005', 1, 2, 2, NULL, 'primary','rejected',              'rejected');
+-- Sample Leads (ON DUPLICATE KEY UPDATE keeps sample data clean on repeated runs)
+INSERT INTO leads (id, student_name, email, phone, university_id, course_id, center_id, subcenter_id, lead_type, status, adm_status) VALUES
+(1, 'Ravi Teja',    'ravi@example.com',   '9000000001', 1, 1, 2, 3, 'Primary',      'New Lead',                     'Pending'),
+(2, 'Pooja Singh',  'pooja@example.com',  '9000000002', 2, 3, 2, 3, 'Under Review', 'Fees Collected',               'Pending'),
+(3, 'Aman Khan',    'aman@example.com',   '9000000003', 3, 5, 2, 3, 'Duplicate',    'Docs Under Review/Incomplete', 'Approved'),
+(4, 'Neha Gupta',   'neha@example.com',   '9000000004', 4, 7, 2, 3, 'Primary',      'Admission Approved',           'Approved'),
+(5, 'Vikas Nair',   'vikas@example.com',  '9000000005', 1, 2, 2, NULL, 'Under Review', 'Refund Initiated',          'Refunded')
+ON DUPLICATE KEY UPDATE
+  lead_type = VALUES(lead_type),
+  status = VALUES(status),
+  adm_status = VALUES(adm_status);

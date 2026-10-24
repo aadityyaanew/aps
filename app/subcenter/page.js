@@ -12,15 +12,16 @@ export default function SubcenterDashboard() {
   const { data: session } = useSession();
   const { leads, isLoading } = useLeads("subcenter");
 
-  const admitted  = leads.filter((l) => l.status === "admitted").length;
-  const primary   = leads.filter((l) => l.lead_type === "primary").length;
-  const secondary = leads.filter((l) => l.lead_type === "secondary").length;
+  const admitted   = leads.filter((l) => l.status === "Admission Approved").length;
+  const primary    = leads.filter((l) => l.lead_type === "Primary").length;
+  const duplicate  = leads.filter((l) => l.lead_type === "Duplicate").length;
+  const review     = leads.filter((l) => l.lead_type === "Under Review").length;
 
   const stats = [
     { label: "My Total Leads",   value: leads.length, icon: ClipboardList, color: "crimson", description: "All leads you've added"   },
-    { label: "Primary Leads",    value: primary,       icon: UserCheck,     color: "blue",    description: "Unique leads"              },
-    { label: "Secondary Leads",  value: secondary,     icon: TrendingUp,    color: "orange",  description: "Duplicate phone matches"   },
-    { label: "Admitted",         value: admitted,      icon: CheckCircle,   color: "green",   description: "Successfully admitted"     },
+    { label: "Primary Leads",    value: primary,      icon: UserCheck,     color: "green",   description: "Successfully pushed leads" },
+    { label: "Duplicate Leads",  value: duplicate,    icon: TrendingUp,    color: "orange",  description: "Duplicate phone matches"   },
+    { label: "Under Review",     value: review,       icon: CheckCircle,   color: "blue",    description: "Pending verification / push"},
   ];
 
   return (
