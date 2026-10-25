@@ -16,7 +16,6 @@ const EMPTY = {
   universityId: "",
   courseId: "",
   centerId: "",
-  notes: "",
 };
 
 export default function AddLeadDialog({ open, onClose, onSubmit, isAdmin = false }) {
@@ -25,8 +24,28 @@ export default function AddLeadDialog({ open, onClose, onSubmit, isAdmin = false
   const [error, setError] = useState("");
 
   async function handleSubmit() {
-    if (!values.studentName || !values.phone) {
-      setError("Student name and phone are required.");
+    if (!values.studentName?.trim()) {
+      setError("Student name is required.");
+      return;
+    }
+    if (!values.phone?.trim()) {
+      setError("Phone number is required.");
+      return;
+    }
+    if (!values.email?.trim()) {
+      setError("Email is required.");
+      return;
+    }
+    if (isAdmin && !values.centerId) {
+      setError("Please select a target unit.");
+      return;
+    }
+    if (!values.universityId) {
+      setError("Please select a university.");
+      return;
+    }
+    if (!values.courseId) {
+      setError("Please select a course.");
       return;
     }
     setError("");

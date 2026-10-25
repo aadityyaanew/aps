@@ -30,11 +30,15 @@ export async function POST(request) {
   if (error === "forbidden")       return forbidden();
   try {
     const body = await request.json();
-    const { studentName, phone } = body;
+    const { studentName, phone, email, universityId, courseId } = body;
     let centerId = body.centerId;
 
-    if (!studentName || !phone) {
-      return err("studentName and phone are required");
+    if (!studentName?.trim() || !phone?.trim() || !email?.trim()) {
+      return err("studentName, phone, and email are required");
+    }
+
+    if (!universityId || !courseId) {
+      return err("universityId and courseId are required");
     }
 
     // If centerId not specified, associate with first active center or fallback

@@ -28,8 +28,13 @@ export async function POST(request) {
   if (error === "forbidden")       return forbidden();
   try {
     const body = await request.json();
-    const { studentName, phone } = body;
-    if (!studentName || !phone) return err("studentName and phone are required");
+    const { studentName, phone, email, universityId, courseId } = body;
+    if (!studentName?.trim() || !phone?.trim() || !email?.trim()) {
+      return err("studentName, phone, and email are required");
+    }
+    if (!universityId || !courseId) {
+      return err("universityId and courseId are required");
+    }
     const id = await addLead({
       ...body,
       centerId:    user.parentCenterId,

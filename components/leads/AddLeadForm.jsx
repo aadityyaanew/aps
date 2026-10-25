@@ -42,7 +42,7 @@ export default function AddLeadForm({ values, onChange, isAdmin = false }) {
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="lead-email">Email</Label>
+        <Label htmlFor="lead-email">Email *</Label>
         <Input
           id="lead-email"
           type="email"
@@ -74,7 +74,7 @@ export default function AddLeadForm({ values, onChange, isAdmin = false }) {
       )}
 
       <div className="space-y-1.5">
-        <Label htmlFor="lead-university">University</Label>
+        <Label htmlFor="lead-university">University *</Label>
         <Select
           value={values.universityId ? String(values.universityId) : ""}
           onValueChange={(v) => {
@@ -96,7 +96,7 @@ export default function AddLeadForm({ values, onChange, isAdmin = false }) {
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="lead-course">Course</Label>
+        <Label htmlFor="lead-course">Course *</Label>
         <Select
           value={values.courseId ? String(values.courseId) : ""}
           onValueChange={(v) => set("courseId", v)}
@@ -113,16 +113,6 @@ export default function AddLeadForm({ values, onChange, isAdmin = false }) {
             ))}
           </SelectContent>
         </Select>
-      </div>
-
-      <div className="space-y-1.5 sm:col-span-2">
-        <Label htmlFor="lead-notes">Notes</Label>
-        <Input
-          id="lead-notes"
-          placeholder="Any additional notes..."
-          value={values.notes ?? ""}
-          onChange={(e) => set("notes", e.target.value)}
-        />
       </div>
     </div>
   );
