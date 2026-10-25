@@ -8,13 +8,16 @@
 import { useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Trash2 } from "lucide-react";
 import LeadFilters from "./LeadFilters";
 import LeadStatusBadge from "./LeadStatusBadge";
 import AdmStatusBadge from "./AdmStatusBadge";
 import LeadTypeBadge from "./LeadTypeBadge";
 import EmptyState from "@/components/common/EmptyState";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 import { useDebounce } from "@/hooks/useDebounce";
 import { LEAD_STATUS_OPTIONS, ADM_STATUS_OPTIONS, LEAD_TYPE_OPTIONS } from "@/config/lead-status";
 
@@ -27,25 +30,95 @@ export default function LeadsTable({
   onUpdateStatus,
   onUpdateAdmStatus,
   onUpdateType,
+  onDeleteLead,
 }) {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [center, setCenter] = useState("");
+  const [subcenter, setSubcenter] = useState("");
+  const [leadToDelete, setLeadToDelete] = useState(null);
   const debounced = useDebounce(search);
 
+  // Distinct unit (center) and associate (subcenter) options from data
+  const centerOptions = Array.from(
+    new Set((leads || []).map((l) => l.center_name).filter(Boolean))
+  ).sort();
+
+  const subcenterOptions = Array.from(
+    new Set((leads || []).map((l) => l.subcenter_name).filter(Boolean))
+  ).sort();
+
+  const handleResetFilters = () => {
+    setSearch("");
+    setStatus("");
+    setStartDate("");
+    setEndDate("");
+    setCenter("");
+    setSubcenter("");
+  };
+
   const filtered = (leads || []).filter((l) => {
+    // Search filter
     const matchSearch =
       !debounced ||
       l.student_name?.toLowerCase().includes(debounced.toLowerCase()) ||
       l.phone?.includes(debounced) ||
       l.email?.toLowerCase().includes(debounced.toLowerCase());
+
+    // Status filter
     const matchStatus = !status || l.status === status;
-    return matchSearch && matchStatus;
+
+    // Unit filter
+    const matchCenter = !center || l.center_name === center;
+
+    // Associate filter
+    const matchSubcenter = !subcenter || l.subcenter_name === subcenter;
+
+    // Date range filter on created_at (Punched Date)
+    let matchDate = true;
+    if (l.created_at) {
+      const leadDate = new Date(l.created_at);
+      if (startDate) {
+        const start = new Date(startDate);
+        start.setHours(0, 0, 0, 0);
+        if (leadDate < start) matchDate = false;
+      }
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        if (leadDate > end) matchDate = false;
+      }
+    } else if (startDate || endDate) {
+      matchDate = false;
+    }
+
+    return matchSearch && matchStatus && matchCenter && matchSubcenter && matchDate;
   });
 
   return (
     <Card className="border border-slate-200/80 shadow-sm overflow-hidden">
       <div className="p-4 border-b bg-white">
-        <LeadFilters search={search} onSearchChange={setSearch} status={status} onStatusChange={setStatus} />
+        <LeadFilters
+          search={search}
+          onSearchChange={setSearch}
+          status={status}
+          onStatusChange={setStatus}
+          startDate={startDate}
+          onStartDateChange={setStartDate}
+          endDate={endDate}
+          onEndDateChange={setEndDate}
+          center={center}
+          onCenterChange={setCenter}
+          subcenter={subcenter}
+          onSubcenterChange={setSubcenter}
+          centerOptions={centerOptions}
+          subcenterOptions={subcenterOptions}
+          showCenter={showCenter}
+          showSubcenter={showSubcenter}
+          onResetFilters={handleResetFilters}
+        />
       </div>
 
       {isLoading ? (
@@ -66,6 +139,9 @@ export default function LeadsTable({
                 <TableHead className="font-semibold text-slate-700">Status</TableHead>
                 <TableHead className="font-semibold text-slate-700">ADM Status</TableHead>
                 <TableHead className="font-semibold text-slate-700">Punched Date & Time</TableHead>
+                {isAdmin && onDeleteLead && (
+                  <TableHead className="font-semibold text-slate-700 text-right pr-4">Action</TableHead>
+                )}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -167,12 +243,44 @@ export default function LeadsTable({
                       <span className="text-slate-400">—</span>
                     )}
                   </TableCell>
+                  {isAdmin && onDeleteLead && (
+                    <TableCell className="text-right pr-4">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Delete Lead"
+                        onClick={() => setLeadToDelete(lead)}
+                      >
+                        <Trash2 size={16} />
+                      </Button>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={!!leadToDelete}
+        onClose={() => setLeadToDelete(null)}
+        onConfirm={async () => {
+          if (leadToDelete) {
+            await onDeleteLead(leadToDelete.id);
+          }
+        }}
+        title="Delete Lead"
+        description={
+          leadToDelete
+            ? `Are you sure you want to permanently delete lead "${leadToDelete.student_name}" (${leadToDelete.phone})? This action cannot be undone.`
+            : "Are you sure you want to delete this lead?"
+        }
+        confirmLabel="Delete Lead"
+        variant="destructive"
+      />
     </Card>
   );
 }

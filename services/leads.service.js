@@ -84,6 +84,11 @@ export async function updateLead(leadId, data) {
   return leadsRepo.updateLead(leadId, data);
 }
 
+/** Delete lead */
+export async function deleteLead(leadId) {
+  return leadsRepo.deleteLead(leadId);
+}
+
 /** Get dashboard stats */
 export async function getDashboardStats(centerId = null) {
   return leadsRepo.countStats(centerId);

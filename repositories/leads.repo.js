@@ -116,6 +116,11 @@ export async function updateLead(id, { studentName, email, phone, universityId, 
   );
 }
 
+/** Delete lead by id */
+export async function deleteLead(id) {
+  return execute(`DELETE FROM leads WHERE id = ?`, [id]);
+}
+
 /** Count stats for dashboard */
 export async function countStats(centerId = null) {
   const where = centerId ? "WHERE center_id = ?" : "";

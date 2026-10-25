@@ -86,6 +86,17 @@ export function useLeads(role, filters = {}) {
     await mutate();
   }, [role, mutate]);
 
+  // Delete Lead (Super Admin)
+  const deleteLead = useCallback(async (leadId) => {
+    const res = await fetch(`/api/admin/leads/${leadId}`, {
+      method: "DELETE",
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error ?? "Failed to delete lead");
+    await mutate();
+    return json.data;
+  }, [mutate]);
+
   return {
     leads:            data ?? [],
     isLoading,
@@ -94,6 +105,7 @@ export function useLeads(role, filters = {}) {
     updateStatus,
     updateAdmStatus,
     updateType,
+    deleteLead,
     refresh:          mutate,
   };
 }

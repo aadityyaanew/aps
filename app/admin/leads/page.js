@@ -13,7 +13,7 @@ import { useLeads } from "@/hooks/useLeads";
 
 export default function AdminLeadsPage() {
   const [openAdd, setOpenAdd] = useState(false);
-  const { leads, isLoading, addLead, updateStatus, updateAdmStatus, updateType } = useLeads("admin");
+  const { leads, isLoading, addLead, updateStatus, updateAdmStatus, updateType, deleteLead } = useLeads("admin");
 
   return (
     <div className="space-y-6">
@@ -40,6 +40,7 @@ export default function AdminLeadsPage() {
         onUpdateStatus={updateStatus}
         onUpdateAdmStatus={updateAdmStatus}
         onUpdateType={updateType}
+        onDeleteLead={deleteLead}
       />
 
       <AddLeadDialog

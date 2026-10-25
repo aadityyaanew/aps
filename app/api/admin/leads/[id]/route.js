@@ -4,7 +4,7 @@
  */
 import { ok, err, unauthorized, forbidden, serverError } from "@/lib/api-response";
 import { requireRole } from "@/lib/session";
-import { updateLeadStatus, updateAdmStatus, updateLeadType, updateLead } from "@/services/leads.service";
+import { updateLeadStatus, updateAdmStatus, updateLeadType, updateLead, deleteLead } from "@/services/leads.service";
 
 export async function PUT(request, { params }) {
   const { error } = await requireRole("admin");
@@ -33,6 +33,20 @@ export async function PUT(request, { params }) {
     if (e.message?.startsWith("Invalid")) {
       return err(e.message, 422);
     }
+    return serverError(e);
+  }
+}
+
+export async function DELETE(request, { params }) {
+  const { error } = await requireRole("admin");
+  if (error === "unauthenticated") return unauthorized();
+  if (error === "forbidden")       return forbidden();
+
+  try {
+    const { id } = await params;
+    await deleteLead(id);
+    return ok({ deleted: true });
+  } catch (e) {
     return serverError(e);
   }
 }
