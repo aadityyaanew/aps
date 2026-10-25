@@ -30,7 +30,7 @@ export default function AddCenterDialog({ open, onClose, onSubmit, title = "Add 
   }
 
   return (
-    <Dialog open={open} onOpenChange={() => { setValues(EMPTY); setError(""); onClose(); }}>
+    <Dialog open={open} onOpenChange={(val) => { if (!val) { setValues(EMPTY); setError(""); onClose(); } }}>
       <DialogContent className="max-w-md">
         <DialogHeader><DialogTitle>{title}</DialogTitle></DialogHeader>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

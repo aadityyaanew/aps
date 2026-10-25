@@ -21,7 +21,7 @@ export default function ConfirmDialog({ open, onClose, onConfirm, title, descrip
   }
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={(val) => !val && onClose()}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>

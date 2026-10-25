@@ -4,7 +4,14 @@
 import { query, queryOne, execute } from "@/lib/db";
 
 export async function findAllUniversities() {
-  return query(`SELECT id, name, location, website FROM universities ORDER BY name ASC`);
+  return query(`
+    SELECT u.id, u.name, u.location, u.website,
+           COUNT(c.id) AS course_count
+    FROM universities u
+    LEFT JOIN courses c ON c.university_id = u.id
+    GROUP BY u.id
+    ORDER BY u.name ASC
+  `);
 }
 
 export async function findUniversityById(id) {
@@ -17,6 +24,19 @@ export async function createUniversity({ name, location, website }) {
     [name, location ?? null, website ?? null]
   );
   return result.insertId;
+}
+
+export async function updateUniversity(id, { name, location, website }) {
+  await execute(
+    `UPDATE universities SET name=?, location=?, website=?, created_at=created_at WHERE id=?`,
+    [name, location ?? null, website ?? null, id]
+  );
+}
+
+export async function deleteUniversity(id) {
+  await execute(`UPDATE leads SET university_id = NULL, course_id = NULL WHERE university_id = ?`, [id]);
+  await execute(`DELETE FROM courses WHERE university_id = ?`, [id]);
+  await execute(`DELETE FROM universities WHERE id = ?`, [id]);
 }
 
 export async function findCoursesByUniversity(universityId) {
@@ -36,4 +56,16 @@ export async function createCourse({ universityId, name, duration, fees }) {
     [universityId, name, duration ?? null, fees ?? null]
   );
   return result.insertId;
+}
+
+export async function updateCourse(id, { name, duration, fees }) {
+  await execute(
+    `UPDATE courses SET name=?, duration=?, fees=? WHERE id=?`,
+    [name, duration ?? null, fees ?? null, id]
+  );
+}
+
+export async function deleteCourse(id) {
+  await execute(`UPDATE leads SET course_id = NULL WHERE course_id = ?`, [id]);
+  await execute(`DELETE FROM courses WHERE id = ?`, [id]);
 }

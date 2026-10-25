@@ -68,7 +68,7 @@ export default function AddLeadDialog({ open, onClose, onSubmit, isAdmin = false
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
+    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) handleClose(); }}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>Add New Lead</DialogTitle>

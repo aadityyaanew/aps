@@ -28,7 +28,7 @@ export default function UserMenu({ user }) {
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+        <DropdownMenuTrigger className="rounded-full outline-none">
           <Avatar className="h-9 w-9 cursor-pointer ring-2 ring-[#8B0000]/30 hover:ring-[#8B0000] transition-all">
             <AvatarFallback className="bg-[#8B0000] text-white text-sm font-semibold">
               {initials}

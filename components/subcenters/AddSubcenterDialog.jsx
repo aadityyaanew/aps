@@ -41,7 +41,7 @@ export default function AddSubcenterDialog({ open, onClose, onSubmit, isAdmin = 
   }
 
   return (
-    <Dialog open={open} onOpenChange={() => { setValues(EMPTY); setError(""); onClose(); }}>
+    <Dialog open={open} onOpenChange={(val) => { if (!val) { setValues(EMPTY); setError(""); onClose(); } }}>
       <DialogContent className="max-w-md">
         <DialogHeader><DialogTitle>Add New Associate</DialogTitle></DialogHeader>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

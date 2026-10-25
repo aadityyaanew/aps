@@ -7,7 +7,7 @@ import {
   Building2,
   Users,
   ClipboardList,
-  UserSquare2,
+  GraduationCap,
 } from "lucide-react";
 
 /** @type {Record<string, Array<{label: string, href: string, icon: any}>>} */
@@ -17,6 +17,7 @@ export const NAV_ITEMS = {
     { label: "Units",       href: "/admin/centers",     icon: Building2       },
     { label: "Associates",  href: "/admin/subcenters",  icon: Users           },
     { label: "All Leads",   href: "/admin/leads",       icon: ClipboardList   },
+    { label: "Colleges",    href: "/admin/colleges",    icon: GraduationCap   },
   ],
   center: [
     { label: "Dashboard",   href: "/center",            icon: LayoutDashboard },
