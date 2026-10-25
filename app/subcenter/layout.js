@@ -7,7 +7,14 @@ import { redirect } from "next/navigation";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
 
-export const metadata = { title: "Associate Dashboard — Compare Degree APS" };
+export const metadata = {
+  title: "Associate Dashboard — Compare Degree APS",
+  icons: {
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
+  },
+};
 
 export default async function SubcenterLayout({ children }) {
   const session = await getServerSession(authOptions);
