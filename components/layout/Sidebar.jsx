@@ -16,12 +16,15 @@ export default function Sidebar({ role }) {
   return (
     <aside className="flex h-screen w-64 flex-col border-r bg-[#1a0a0a] text-white">
       {/* Logo */}
-      <div className="flex h-16 items-center gap-3 px-5 border-b border-white/10">
-        <Image src="/logo.png" alt="Compare Degree" width={36} height={36} className="h-9 w-auto object-contain rounded-md" />
-        <div className="leading-tight">
-          <p className="text-sm font-bold text-white">Compare Degree</p>
-          <p className="text-[10px] text-white/50 uppercase tracking-wider">{role} panel</p>
-        </div>
+      <div className="flex h-16 items-center px-5 border-b border-white/10">
+        <Image
+          src="/logo.png"
+          alt="Compare Degree"
+          width={180}
+          height={45}
+          className="h-10 w-auto max-w-full object-contain"
+          priority
+        />
       </div>
 
       {/* Navigation */}
