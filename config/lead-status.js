@@ -3,7 +3,10 @@
  * 
  * Rules:
  * - Lead Type: Default is "Under Review"
- *   Pushing logic: Primary (if pushed), Duplicate (if duplicate exists), Under Review (missing university/API error/default)
+ *   Duplicate Criteria: A lead is marked "Duplicate" ONLY when Mobile Number, Email ID,
+ *   and University ALL match an existing lead simultaneously. Any partial match (e.g. mobile + email)
+ *   is treated as a Normal Lead with initial status "Under Review".
+ *   Pushing logic: Primary (if pushed), Duplicate (if duplicate exists in CRM), Under Review (default/normal)
  * - Status: Only edited by Super Admin, Default is "New Lead"
  * - ADM Status: Only edited by Super Admin, Default is "Pending"
  */

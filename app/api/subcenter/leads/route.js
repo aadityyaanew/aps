@@ -35,11 +35,15 @@ export async function POST(request) {
     if (!universityId || !courseId) {
       return err("universityId and courseId are required");
     }
-    const id = await addLead({
+    const result = await addLead({
       ...body,
       centerId:    user.parentCenterId,
       subcenterId: user.id,
     });
-    return ok({ id }, 201);
+    return ok({
+      id: result.id,
+      leadType: result.leadType,
+      isDuplicate: result.isDuplicate,
+    }, 201);
   } catch (e) { return serverError(e); }
 }

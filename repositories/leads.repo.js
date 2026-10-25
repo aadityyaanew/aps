@@ -57,11 +57,64 @@ export async function findById(id) {
   return queryOne(`${BASE_SELECT} WHERE l.id = ? LIMIT 1`, [id]);
 }
 
-/** Check for duplicate lead by phone + center */
-export async function findDuplicate(phone, centerId) {
+/**
+ * Check for duplicate lead.
+ * Duplicate Lead Criteria:
+ * A lead is marked as a duplicate ONLY when all three fields match an existing lead simultaneously:
+ * 1. Mobile Number (phone)
+ * 2. Email ID (email)
+ * 3. University (university_id)
+ *
+ * Partial matches (e.g. mobile + email only, mobile + university, email + university)
+ * must return null so the entry is treated as a Normal Lead.
+ */
+export async function findDuplicate(firstArg, emailArg, universityIdArg) {
+  let phone, email, universityId, excludeId;
+  if (firstArg && typeof firstArg === "object") {
+    ({ phone, email, universityId, excludeId } = firstArg);
+  } else {
+    phone = firstArg;
+    email = emailArg;
+    universityId = universityIdArg;
+  }
+
+  const cleanPhone = phone ? String(phone).trim() : "";
+  const cleanEmail = email ? String(email).trim().toLowerCase() : "";
+  const parsedUni = universityId ? parseInt(universityId, 10) : null;
+
+  // All 3 fields must be present and valid to qualify as a duplicate
+  if (!cleanPhone || !cleanEmail || !parsedUni || isNaN(parsedUni) || parsedUni <= 0) {
+    return null;
+  }
+
+  const digits = cleanPhone.replace(/[^0-9]/g, "");
+  const last10 = digits.length >= 10 ? digits.slice(-10) : "";
+
+  const params = [cleanPhone];
+  let phoneClause = "TRIM(phone) = ?";
+  if (last10) {
+    phoneClause += " OR RIGHT(REPLACE(REPLACE(REPLACE(phone, ' ', ''), '-', ''), '+', ''), 10) = ?";
+    params.push(last10);
+  }
+
+  params.push(cleanEmail);
+  params.push(parsedUni);
+
+  let excludeClause = "";
+  if (excludeId) {
+    excludeClause = " AND id != ?";
+    params.push(excludeId);
+  }
+
   return queryOne(
-    `SELECT id FROM leads WHERE phone = ? AND center_id = ? LIMIT 1`,
-    [phone, centerId]
+    `SELECT id, student_name, phone, email, university_id, lead_type, status
+     FROM leads
+     WHERE (${phoneClause})
+       AND LOWER(TRIM(email)) = ?
+       AND university_id = ?
+       ${excludeClause}
+     LIMIT 1`,
+    params
   );
 }
 

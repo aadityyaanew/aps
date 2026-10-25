@@ -7,33 +7,56 @@ import { LEAD_STATUS, ADM_STATUS, LEAD_TYPE } from "@/config/lead-status";
 
 /**
  * Add a new lead.
- * Type rule:
- * - Default should be "Under Review"
- * - If lead already exists (duplicate phone in same center/system) -> "Duplicate"
- * - If missing university or API error -> "Under Review"
- * - If lead is pushed with valid university -> "Primary" (or can be updated by automation/backend)
+ *
+ * Duplicate Lead Detection Rules:
+ * 1. Duplicate Lead Criteria: A lead is marked as a duplicate ONLY when all three fields
+ *    match an existing lead simultaneously:
+ *    - Mobile Number (phone)
+ *    - Email ID (email)
+ *    - University (universityId)
+ *
+ * 2. Partial Matches: If only the mobile number and email ID match, or any other combination
+ *    of two fields matches, the system must treat the entry as a Normal Lead, not a duplicate.
+ *
+ * 3. New Lead Status: Every newly added lead that does not meet all three duplicate criteria
+ *    must be saved as a normal lead with the initial status set to "Under Review".
+ *
+ * 4. Validation Rule: Mark a lead as Duplicate only if Mobile Number, Email ID, and University
+ *    all match an existing lead simultaneously. Otherwise, accept it as a normal lead and assign
+ *    the status "Under Review".
  */
 export async function addLead(data) {
-  const { phone, centerId, universityId, leadType: customType } = data;
+  const { phone, email, universityId, leadType: customType, status: customStatus } = data;
 
-  let computedType = customType || "Under Review";
+  // Check duplicate against all 3 criteria simultaneously
+  const duplicate = await leadsRepo.findDuplicate({
+    phone,
+    email,
+    universityId,
+  });
 
-  // Check duplicate
-  const duplicate = await leadsRepo.findDuplicate(phone, centerId);
-  const validUniId = universityId ? parseInt(universityId, 10) : null;
-
+  let computedType;
   if (duplicate) {
     computedType = "Duplicate";
-  } else if (!customType) {
-    computedType = "Under Review";
+  } else {
+    // Normal lead initial status / lead_type: Under Review
+    computedType = customType || "Under Review";
   }
 
-  return leadsRepo.createLead({
+  const id = await leadsRepo.createLead({
     ...data,
     leadType: computedType,
-    status: "New Lead",
-    admStatus: "Pending",
+    status: customStatus || "New Lead",
+    admStatus: data.admStatus || "Pending",
   });
+
+  return {
+    id,
+    leadType: computedType,
+    isDuplicate: computedType === "Duplicate",
+    toString() { return String(id); },
+    valueOf() { return id; },
+  };
 }
 
 /** Get leads for admin — all leads with optional filters */

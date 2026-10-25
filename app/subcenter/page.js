@@ -20,7 +20,7 @@ export default function SubcenterDashboard() {
   const stats = [
     { label: "My Total Leads",   value: leads.length, icon: ClipboardList, color: "crimson", description: "All leads you've added"   },
     { label: "Primary Leads",    value: primary,      icon: UserCheck,     color: "green",   description: "Successfully pushed leads" },
-    { label: "Duplicate Leads",  value: duplicate,    icon: TrendingUp,    color: "orange",  description: "Duplicate phone matches"   },
+    { label: "Duplicate Leads",  value: duplicate,    icon: TrendingUp,    color: "orange",  description: "Matched phone, email & university" },
     { label: "Under Review",     value: review,       icon: CheckCircle,   color: "blue",    description: "Pending verification / push"},
   ];
 

@@ -53,12 +53,16 @@ export async function POST(request) {
       return err("A valid center must exist to assign leads.");
     }
 
-    const id = await addLead({
+    const result = await addLead({
       ...body,
       centerId,
       subcenterId: body.subcenterId || null,
     });
-    return ok({ id }, 201);
+    return ok({
+      id: result.id,
+      leadType: result.leadType,
+      isDuplicate: result.isDuplicate,
+    }, 201);
   } catch (e) {
     return serverError(e);
   }

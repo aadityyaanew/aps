@@ -90,42 +90,61 @@ export async function POST(request, { params }) {
       }
 
       const phoneClean = (lead.phone || "").replace(/[^0-9]/g, "");
+      const targetEmail = (lead.email || "").trim().toLowerCase();
 
-      // 1. Check if lead already exists in Shoolini CRM by Phone
+      // Duplicate Lead Criteria:
+      // A lead is marked as a duplicate ONLY when all three fields match simultaneously:
+      // Mobile Number, Email ID, and University.
+      // Partial matches (e.g. only phone, or only email) must be treated as Normal Leads, not duplicate.
       let isDuplicate = false;
 
-      if (phoneClean) {
+      if (phoneClean && targetEmail) {
         try {
           const phoneUrl = `${host.replace(/\/+$/, "")}/LeadManagement.svc/RetrieveLeadByPhoneNumber?accessKey=${encodeURIComponent(accessKey)}&secretKey=${encodeURIComponent(secretKey)}&phone=${encodeURIComponent(phoneClean)}`;
           const phoneRes = await fetch(phoneUrl);
           if (phoneRes.ok) {
             const phoneData = await phoneRes.json().catch(() => null);
             if (Array.isArray(phoneData) && phoneData.length > 0) {
-              isDuplicate = true;
+              // Verify that email ALSO matches on at least one returned lead
+              const matched = phoneData.some((item) => {
+                const itemEmail = (item.EmailAddress || item.Email || "").trim().toLowerCase();
+                return itemEmail && itemEmail === targetEmail;
+              });
+              if (matched) {
+                isDuplicate = true;
+              }
             }
           }
         } catch (e) {
           console.warn("[Shoolini Check Phone Error]:", e.message);
         }
-      }
 
-      // 2. Check if lead already exists by Email if phone didn't match
-      if (!isDuplicate && lead.email?.trim()) {
-        try {
-          const emailUrl = `${host.replace(/\/+$/, "")}/LeadManagement.svc/Leads.GetByEmailaddress?accessKey=${encodeURIComponent(accessKey)}&secretKey=${encodeURIComponent(secretKey)}&emailaddress=${encodeURIComponent(lead.email.trim())}`;
-          const emailRes = await fetch(emailUrl);
-          if (emailRes.ok) {
-            const emailData = await emailRes.json().catch(() => null);
-            if (Array.isArray(emailData) && emailData.length > 0) {
-              isDuplicate = true;
+        // If phone query didn't find a simultaneous match, check email query to verify if phone matches
+        if (!isDuplicate) {
+          try {
+            const emailUrl = `${host.replace(/\/+$/, "")}/LeadManagement.svc/Leads.GetByEmailaddress?accessKey=${encodeURIComponent(accessKey)}&secretKey=${encodeURIComponent(secretKey)}&emailaddress=${encodeURIComponent(targetEmail)}`;
+            const emailRes = await fetch(emailUrl);
+            if (emailRes.ok) {
+              const emailData = await emailRes.json().catch(() => null);
+              if (Array.isArray(emailData) && emailData.length > 0) {
+                const matched = emailData.some((item) => {
+                  const itemPhone = String(item.Phone || item.Mobile || "").replace(/[^0-9]/g, "");
+                  const itemLast10 = itemPhone.slice(-10);
+                  const targetLast10 = phoneClean.slice(-10);
+                  return itemLast10 && targetLast10 && itemLast10 === targetLast10;
+                });
+                if (matched) {
+                  isDuplicate = true;
+                }
+              }
             }
+          } catch (e) {
+            console.warn("[Shoolini Check Email Error]:", e.message);
           }
-        } catch (e) {
-          console.warn("[Shoolini Check Email Error]:", e.message);
         }
       }
 
-      // If already exists in LeadSquared CRM:
+      // If already exists in LeadSquared CRM matching both Phone and Email simultaneously:
       if (isDuplicate) {
         await leadsRepo.updateLeadType(id, "Duplicate");
         return ok({
