@@ -25,7 +25,8 @@ INSERT IGNORE INTO universities (id, name, location) VALUES
 (2, 'LPU - Lovely Professional University', 'Phagwara, Punjab'),
 (3, 'Chandigarh University', 'Chandigarh, Punjab'),
 (4, 'Amity University', 'Noida, Uttar Pradesh'),
-(5, 'Manipal University', 'Manipal, Karnataka');
+(5, 'Manipal University', 'Manipal, Karnataka'),
+(6, 'Shoolini University', 'Solan, Himachal Pradesh');
 
 -- Courses
 INSERT IGNORE INTO courses (id, university_id, name, duration, fees) VALUES
@@ -36,7 +37,8 @@ INSERT IGNORE INTO courses (id, university_id, name, duration, fees) VALUES
 (5, 3, 'Bachelor of Technology (B.Tech)', '4 Years', 150000),
 (6, 3, 'Master of Computer Applications (MCA)', '2 Years', 130000),
 (7, 4, 'Bachelor of Business Administration (BBA)', '3 Years', 110000),
-(8, 5, 'Master of Technology (M.Tech)', '2 Years', 200000);
+(8, 5, 'Master of Technology (M.Tech)', '2 Years', 200000),
+(9, 6, 'MBA Online', '2 Years', 150000);
 
 -- Sample Leads (ON DUPLICATE KEY UPDATE keeps sample data clean on repeated runs)
 INSERT INTO leads (id, student_name, email, phone, university_id, course_id, center_id, subcenter_id, lead_type, status, adm_status) VALUES

@@ -5,7 +5,6 @@
  * If isAdmin is true, allows assigning the lead to a specific Center.
  */
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useUniversities, useCourses } from "@/hooks/useUniversities";
 import { useCenters } from "@/hooks/useCenters";
@@ -55,64 +54,73 @@ export default function AddLeadForm({ values, onChange, isAdmin = false }) {
       {isAdmin && (
         <div className="space-y-1.5 sm:col-span-2">
           <Label htmlFor="lead-center">Assign Unit *</Label>
-          <Select
-            value={values.centerId ? String(values.centerId) : ""}
-            onValueChange={(v) => set("centerId", v)}
-          >
-            <SelectTrigger id="lead-center">
-              <SelectValue placeholder="Select target unit" />
-            </SelectTrigger>
-            <SelectContent>
+          <div className="relative">
+            <select
+              id="lead-center"
+              value={values.centerId ? String(values.centerId) : ""}
+              onChange={(e) => set("centerId", e.target.value)}
+              className="flex h-9 w-full appearance-none items-center rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer pr-8"
+            >
+              <option value="" disabled>Select target unit</option>
               {centers.map((c) => (
-                <SelectItem key={c.id} value={String(c.id)}>
+                <option key={c.id} value={String(c.id)}>
                   {c.organization_name || c.name} {!c.is_active ? "(Inactive)" : ""}
-                </SelectItem>
+                </option>
               ))}
-            </SelectContent>
-          </Select>
+            </select>
+            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+              ▼
+            </span>
+          </div>
         </div>
       )}
 
       <div className="space-y-1.5">
         <Label htmlFor="lead-university">University *</Label>
-        <Select
-          value={values.universityId ? String(values.universityId) : ""}
-          onValueChange={(v) => {
-            set("universityId", v);
-            set("courseId", "");
-          }}
-        >
-          <SelectTrigger id="lead-university">
-            <SelectValue placeholder="Select university" />
-          </SelectTrigger>
-          <SelectContent>
+        <div className="relative">
+          <select
+            id="lead-university"
+            value={values.universityId ? String(values.universityId) : ""}
+            onChange={(e) => {
+              set("universityId", e.target.value);
+              set("courseId", "");
+            }}
+            className="flex h-9 w-full appearance-none items-center rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer pr-8"
+          >
+            <option value="" disabled>Select university</option>
             {universities.map((u) => (
-              <SelectItem key={u.id} value={String(u.id)}>
+              <option key={u.id} value={String(u.id)}>
                 {u.name}
-              </SelectItem>
+              </option>
             ))}
-          </SelectContent>
-        </Select>
+          </select>
+          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs">
+            ▼
+          </span>
+        </div>
       </div>
 
       <div className="space-y-1.5">
         <Label htmlFor="lead-course">Course *</Label>
-        <Select
-          value={values.courseId ? String(values.courseId) : ""}
-          onValueChange={(v) => set("courseId", v)}
-          disabled={!values.universityId}
-        >
-          <SelectTrigger id="lead-course">
-            <SelectValue placeholder="Select course" />
-          </SelectTrigger>
-          <SelectContent>
+        <div className="relative">
+          <select
+            id="lead-course"
+            value={values.courseId ? String(values.courseId) : ""}
+            onChange={(e) => set("courseId", e.target.value)}
+            disabled={!values.universityId}
+            className="flex h-9 w-full appearance-none items-center rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer pr-8"
+          >
+            <option value="" disabled>Select course</option>
             {courses.map((c) => (
-              <SelectItem key={c.id} value={String(c.id)}>
+              <option key={c.id} value={String(c.id)}>
                 {c.name}
-              </SelectItem>
+              </option>
             ))}
-          </SelectContent>
-        </Select>
+          </select>
+          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs">
+            ▼
+          </span>
+        </div>
       </div>
     </div>
   );
