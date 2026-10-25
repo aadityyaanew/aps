@@ -11,40 +11,53 @@ import * as leadsRepo from "@/repositories/leads.repo";
 import fs from "fs";
 import path from "path";
 
+function cleanKey(val) {
+  if (!val) return "";
+  return String(val)
+    .replace(/\\/g, "")           // Strip any escape backslashes (e.g. u\$rf -> u$rf)
+    .replace(/^['"]|['"]$/g, "")  // Strip surrounding quotes
+    .trim();                      // Strip whitespace
+}
+
 function getShooliniCredentials() {
   let host = process.env.SHOOLINI_API_HOST || "https://api-in21.leadsquared.com/v2/";
-  let accessKey = process.env.SHOOLINI_ACCESS_KEY;
-  let secretKey = process.env.SHOOLINI_SECRET_KEY;
+  let accessKey = cleanKey(process.env.SHOOLINI_ACCESS_KEY);
+  let secretKey = cleanKey(process.env.SHOOLINI_SECRET_KEY);
+  host = String(host).replace(/^['"]|['"]$/g, "").trim();
 
-  // Protect against Next.js dotenv-expand bug where $ in access key expands to empty string (e.g. u$rf... -> u)
-  if (!accessKey || accessKey.length < 10 || !secretKey) {
-    try {
-      const envPath = path.join(process.cwd(), ".env.local");
-      if (fs.existsSync(envPath)) {
-        const raw = fs.readFileSync(envPath, "utf-8");
-        for (const line of raw.split("\n")) {
-          const trimmed = line.trim();
-          if (trimmed.startsWith("SHOOLINI_ACCESS_KEY=")) {
-            accessKey = trimmed.replace("SHOOLINI_ACCESS_KEY=", "").replace(/\\/g, "").replace(/^['"]|['"]$/g, "").trim();
+  // Protect against Next.js $ expansion bug or missing keys in production
+  if (!accessKey || accessKey.length < 15 || !secretKey) {
+    const envFiles = [".env.production", ".env.local", ".env"];
+    for (const file of envFiles) {
+      try {
+        const envPath = path.join(process.cwd(), file);
+        if (fs.existsSync(envPath)) {
+          const raw = fs.readFileSync(envPath, "utf-8");
+          for (const line of raw.split("\n")) {
+            const trimmed = line.trim();
+            if (trimmed.startsWith("SHOOLINI_ACCESS_KEY=")) {
+              accessKey = cleanKey(trimmed.replace("SHOOLINI_ACCESS_KEY=", ""));
+            }
+            if (trimmed.startsWith("SHOOLINI_SECRET_KEY=")) {
+              secretKey = cleanKey(trimmed.replace("SHOOLINI_SECRET_KEY=", ""));
+            }
+            if (trimmed.startsWith("SHOOLINI_API_HOST=")) {
+              host = String(trimmed.replace("SHOOLINI_API_HOST=", "")).replace(/^['"]|['"]$/g, "").trim();
+            }
           }
-          if (trimmed.startsWith("SHOOLINI_SECRET_KEY=")) {
-            secretKey = trimmed.replace("SHOOLINI_SECRET_KEY=", "").replace(/^['"]|['"]$/g, "").trim();
-          }
-          if (trimmed.startsWith("SHOOLINI_API_HOST=")) {
-            host = trimmed.replace("SHOOLINI_API_HOST=", "").replace(/^['"]|['"]$/g, "").trim();
-          }
+          if (accessKey && accessKey.length >= 15 && secretKey) break;
         }
+      } catch (e) {
+        console.warn(`[Env Read Warning for ${file}]:`, e.message);
       }
-    } catch (e) {
-      console.warn("[Env Read Fallback Warning]:", e.message);
     }
   }
 
-  // Fallback defaults if env was missing
-  if (!accessKey || accessKey.length < 10) {
+  // Guaranteed fallback to verified Shoolini credentials if production environment is missing them
+  if (!accessKey || accessKey.length < 15) {
     accessKey = "u$rf26e5b7ea589e91e738ca0e5e22db348";
   }
-  if (!secretKey) {
+  if (!secretKey || secretKey.length < 15) {
     secretKey = "2ee455f80eaa54f3e8d24b27bd99ae0393af5b5e";
   }
 
