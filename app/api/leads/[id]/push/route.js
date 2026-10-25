@@ -130,11 +130,17 @@ export async function POST(request, { params }) {
 
       const captureUrl = `${host.replace(/\/+$/, "")}/LeadManagement.svc/Lead.Capture?accessKey=${encodeURIComponent(accessKey)}&secretKey=${encodeURIComponent(secretKey)}`;
 
+      const leadSource = process.env.SHOOLINI_LEAD_SOURCE || "hyskilled";
+
       const payload = [
         { Attribute: "FirstName", Value: firstName },
         { Attribute: "LastName", Value: lastName },
         { Attribute: "Phone", Value: phoneClean },
         { Attribute: "Mobile", Value: phoneClean },
+        { Attribute: "Source", Value: leadSource },
+        { Attribute: "LeadSource", Value: leadSource },
+        { Attribute: "mx_Lead_Source", Value: leadSource },
+        { Attribute: "SourceMedium", Value: leadSource },
       ];
 
       if (lead.email?.trim()) {
