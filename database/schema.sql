@@ -62,6 +62,7 @@ CREATE TABLE IF NOT EXISTS leads (
   lead_type       VARCHAR(50) NOT NULL DEFAULT 'Under Review',
   status          VARCHAR(50) NOT NULL DEFAULT 'New Lead',
   adm_status      VARCHAR(50) NOT NULL DEFAULT 'Pending',
+  is_pushed       TINYINT(1) NOT NULL DEFAULT 0,
   notes           TEXT,
   created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Trash2, Send, Loader2, AlertTriangle, CheckCircle2, X } from "lucide-react";
+import { Trash2, Send, Loader2, AlertTriangle, CheckCircle2, Check, X } from "lucide-react";
 import LeadFilters from "./LeadFilters";
 import LeadStatusBadge from "./LeadStatusBadge";
 import AdmStatusBadge from "./AdmStatusBadge";
@@ -41,11 +41,21 @@ export default function LeadsTable({
   const [subcenter, setSubcenter] = useState("");
   const [leadToDelete, setLeadToDelete] = useState(null);
   const [pushingId, setPushingId] = useState(null);
+  const [pushedIds, setPushedIds] = useState(() => new Set());
   const [banner, setBanner] = useState(null);
   const debounced = useDebounce(search);
 
   async function handlePush(lead) {
+    const isAlreadyPushed = Boolean(
+      lead.is_pushed ||
+      lead.lead_type === "Primary" ||
+      pushedIds.has(lead.id)
+    );
+    if (isAlreadyPushed || pushingId === lead.id) return;
+
     setPushingId(lead.id);
+    // Mark immediately as pushed in local state so button transitions to Pushed state and cannot be clicked again
+    setPushedIds((prev) => new Set(prev).add(lead.id));
     setBanner(null);
     try {
       let res;
@@ -309,20 +319,32 @@ export default function LeadsTable({
                   </TableCell>
                   <TableCell className="text-right pr-4">
                     <div className="flex items-center justify-end gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handlePush(lead)}
-                        disabled={pushingId === lead.id}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 border border-slate-300/80 rounded-full shadow-2xs transition-all disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
-                        title={`Push lead to ${lead.university_name || "University"} CRM`}
-                      >
-                        {pushingId === lead.id ? (
-                          <Loader2 size={13} className="animate-spin text-slate-600" />
-                        ) : (
-                          <Send size={13} className="text-slate-500 -rotate-12" />
-                        )}
-                        <span>Push</span>
-                      </button>
+                      {Boolean(lead.is_pushed || lead.lead_type === "Primary" || pushedIds.has(lead.id)) ? (
+                        <button
+                          type="button"
+                          disabled
+                          className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full shadow-2xs opacity-90 cursor-not-allowed select-none"
+                          title="Lead has already been pushed and cannot be pushed again"
+                        >
+                          <Check size={13} className="text-emerald-600 stroke-[2.5]" />
+                          <span>Pushed</span>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handlePush(lead)}
+                          disabled={pushingId === lead.id}
+                          className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 border border-slate-300/80 rounded-full shadow-2xs transition-all disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                          title={`Push lead to ${lead.university_name || "University"} CRM`}
+                        >
+                          {pushingId === lead.id ? (
+                            <Loader2 size={13} className="animate-spin text-slate-600" />
+                          ) : (
+                            <Send size={13} className="text-slate-500 -rotate-12" />
+                          )}
+                          <span>{pushingId === lead.id ? "Pushing..." : "Push"}</span>
+                        </button>
+                      )}
 
                       {isAdmin && onDeleteLead && (
                         <Button

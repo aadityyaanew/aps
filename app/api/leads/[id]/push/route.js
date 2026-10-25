@@ -73,6 +73,10 @@ export async function POST(request, { params }) {
     const lead = await leadsRepo.findById(id);
     if (!lead) return notFound("Lead");
 
+    if (lead.is_pushed || lead.lead_type === "Primary") {
+      return err("This lead has already been pushed and cannot be pushed again.", 400);
+    }
+
     const uniName = (lead.university_name || "").toLowerCase();
 
     // Check if Shoolini University
@@ -147,6 +151,7 @@ export async function POST(request, { params }) {
       // If already exists in LeadSquared CRM matching both Phone and Email simultaneously:
       if (isDuplicate) {
         await leadsRepo.updateLeadType(id, "Duplicate");
+        await leadsRepo.markAsPushed(id);
         return ok({
           success: true,
           isDuplicate: true,
@@ -244,6 +249,7 @@ export async function POST(request, { params }) {
         captureData?.Status !== "Error"
       ) {
         await leadsRepo.updateLeadType(id, "Primary");
+        await leadsRepo.markAsPushed(id);
         return ok({
           success: true,
           isDuplicate: false,

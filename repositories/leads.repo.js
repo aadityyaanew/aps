@@ -7,6 +7,7 @@ const BASE_SELECT = `
   SELECT
     l.id, l.student_name, l.email, l.phone,
     l.lead_type, l.status, l.adm_status, l.notes,
+    l.is_pushed,
     l.created_at, l.updated_at,
     l.center_id, l.subcenter_id,
     u.name AS university_name,
@@ -158,6 +159,11 @@ export async function updateAdmStatus(id, admStatus) {
 /** Update lead type (e.g. by automation or backend) */
 export async function updateLeadType(id, leadType) {
   return execute(`UPDATE leads SET lead_type=?, updated_at=NOW() WHERE id=?`, [leadType, id]);
+}
+
+/** Mark lead as pushed */
+export async function markAsPushed(id) {
+  return execute(`UPDATE leads SET is_pushed=1, updated_at=NOW() WHERE id=?`, [id]);
 }
 
 /** Full lead update */
