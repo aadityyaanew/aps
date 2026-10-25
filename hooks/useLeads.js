@@ -97,6 +97,17 @@ export function useLeads(role, filters = {}) {
     return json.data;
   }, [mutate]);
 
+  // Push Lead to external University CRM
+  const pushLead = useCallback(async (leadId) => {
+    const res = await fetch(`/api/leads/${leadId}/push`, {
+      method: "POST",
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error ?? "Failed to push lead");
+    await mutate();
+    return json.data;
+  }, [mutate]);
+
   return {
     leads:            data ?? [],
     isLoading,
@@ -106,6 +117,7 @@ export function useLeads(role, filters = {}) {
     updateAdmStatus,
     updateType,
     deleteLead,
+    pushLead,
     refresh:          mutate,
   };
 }

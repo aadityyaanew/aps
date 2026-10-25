@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Trash2 } from "lucide-react";
+import { Trash2, Send, Loader2, AlertTriangle, CheckCircle2, X } from "lucide-react";
 import LeadFilters from "./LeadFilters";
 import LeadStatusBadge from "./LeadStatusBadge";
 import AdmStatusBadge from "./AdmStatusBadge";
@@ -31,6 +31,7 @@ export default function LeadsTable({
   onUpdateAdmStatus,
   onUpdateType,
   onDeleteLead,
+  onPushLead,
 }) {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
@@ -39,7 +40,43 @@ export default function LeadsTable({
   const [center, setCenter] = useState("");
   const [subcenter, setSubcenter] = useState("");
   const [leadToDelete, setLeadToDelete] = useState(null);
+  const [pushingId, setPushingId] = useState(null);
+  const [banner, setBanner] = useState(null);
   const debounced = useDebounce(search);
+
+  async function handlePush(lead) {
+    setPushingId(lead.id);
+    setBanner(null);
+    try {
+      let res;
+      if (onPushLead) {
+        res = await onPushLead(lead.id);
+      } else {
+        const r = await fetch(`/api/leads/${lead.id}/push`, { method: "POST" });
+        const json = await r.json();
+        if (!r.ok) throw new Error(json.error ?? "Failed to push lead");
+        res = json.data;
+      }
+
+      if (!onPushLead && res?.leadType && onUpdateType) {
+        onUpdateType(lead.id, res.leadType);
+      }
+
+      setBanner({
+        type: res?.isDuplicate ? "warning" : "success",
+        text: res?.message ?? (res?.isDuplicate ? "Lead is duplicate!" : "Lead pushed successfully!"),
+      });
+      setTimeout(() => setBanner(null), 6000);
+    } catch (err) {
+      setBanner({
+        type: "error",
+        text: err.message ?? "Failed to push lead",
+      });
+      setTimeout(() => setBanner(null), 6000);
+    } finally {
+      setPushingId(null);
+    }
+  }
 
   // Distinct unit (center) and associate (subcenter) options from data
   const centerOptions = Array.from(
@@ -121,6 +158,35 @@ export default function LeadsTable({
         />
       </div>
 
+      {banner && (
+        <div
+          className={`flex items-center justify-between px-4 py-2.5 text-xs font-medium border-b ${
+            banner.type === "success"
+              ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+              : banner.type === "warning"
+              ? "bg-amber-50 text-amber-800 border-amber-200"
+              : "bg-red-50 text-red-800 border-red-200"
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            {banner.type === "success" ? (
+              <CheckCircle2 size={15} className="text-emerald-600 shrink-0" />
+            ) : banner.type === "warning" ? (
+              <AlertTriangle size={15} className="text-amber-600 shrink-0" />
+            ) : (
+              <AlertTriangle size={15} className="text-red-600 shrink-0" />
+            )}
+            <span>{banner.text}</span>
+          </div>
+          <button
+            onClick={() => setBanner(null)}
+            className="text-slate-400 hover:text-slate-700 cursor-pointer ml-2"
+          >
+            <X size={13} />
+          </button>
+        </div>
+      )}
+
       {isLoading ? (
         <LoadingSpinner />
       ) : filtered.length === 0 ? (
@@ -139,9 +205,7 @@ export default function LeadsTable({
                 <TableHead className="font-semibold text-slate-700">Status</TableHead>
                 <TableHead className="font-semibold text-slate-700">ADM Status</TableHead>
                 <TableHead className="font-semibold text-slate-700">Punched Date & Time</TableHead>
-                {isAdmin && onDeleteLead && (
-                  <TableHead className="font-semibold text-slate-700 text-right pr-4">Action</TableHead>
-                )}
+                <TableHead className="font-semibold text-slate-700 text-right pr-4">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -243,19 +307,36 @@ export default function LeadsTable({
                       <span className="text-slate-400">—</span>
                     )}
                   </TableCell>
-                  {isAdmin && onDeleteLead && (
-                    <TableCell className="text-right pr-4">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Delete Lead"
-                        onClick={() => setLeadToDelete(lead)}
+                  <TableCell className="text-right pr-4">
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handlePush(lead)}
+                        disabled={pushingId === lead.id}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 border border-slate-300/80 rounded-full shadow-2xs transition-all disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                        title={`Push lead to ${lead.university_name || "University"} CRM`}
                       >
-                        <Trash2 size={16} />
-                      </Button>
-                    </TableCell>
-                  )}
+                        {pushingId === lead.id ? (
+                          <Loader2 size={13} className="animate-spin text-slate-600" />
+                        ) : (
+                          <Send size={13} className="text-slate-500 -rotate-12" />
+                        )}
+                        <span>Push</span>
+                      </button>
+
+                      {isAdmin && onDeleteLead && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Delete Lead"
+                          onClick={() => setLeadToDelete(lead)}
+                        >
+                          <Trash2 size={16} />
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

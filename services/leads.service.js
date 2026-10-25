@@ -25,11 +25,7 @@ export async function addLead(data) {
   if (duplicate) {
     computedType = "Duplicate";
   } else if (!customType) {
-    if (!validUniId || validUniId <= 0) {
-      computedType = "Under Review";
-    } else {
-      computedType = "Primary";
-    }
+    computedType = "Under Review";
   }
 
   return leadsRepo.createLead({

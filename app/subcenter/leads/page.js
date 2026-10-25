@@ -11,7 +11,7 @@ import { Plus } from "lucide-react";
 import { useLeads } from "@/hooks/useLeads";
 
 export default function SubcenterLeadsPage() {
-  const { leads, isLoading, addLead } = useLeads("subcenter");
+  const { leads, isLoading, addLead, pushLead } = useLeads("subcenter");
   const [addOpen, setAddOpen] = useState(false);
 
   return (
@@ -26,7 +26,7 @@ export default function SubcenterLeadsPage() {
         }
       />
 
-      <LeadsTable leads={leads} isLoading={isLoading} />
+      <LeadsTable leads={leads} isLoading={isLoading} onPushLead={pushLead} />
 
       <AddLeadDialog
         open={addOpen}

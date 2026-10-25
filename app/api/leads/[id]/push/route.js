@@ -1,0 +1,235 @@
+/**
+ * POST /api/leads/[id]/push
+ * Pushes a lead to the university's external CRM/API (e.g. Shoolini University LeadSquared).
+ * If the lead already exists in the external CRM, updates lead_type to "Duplicate".
+ * If successfully pushed, updates lead_type to "Primary".
+ */
+import { ok, err, unauthorized, serverError, notFound } from "@/lib/api-response";
+import { getSession } from "@/lib/session";
+import * as leadsRepo from "@/repositories/leads.repo";
+
+import fs from "fs";
+import path from "path";
+
+function getShooliniCredentials() {
+  let host = process.env.SHOOLINI_API_HOST || "https://api-in21.leadsquared.com/v2/";
+  let accessKey = process.env.SHOOLINI_ACCESS_KEY;
+  let secretKey = process.env.SHOOLINI_SECRET_KEY;
+
+  // Protect against Next.js dotenv-expand bug where $ in access key expands to empty string (e.g. u$rf... -> u)
+  if (!accessKey || accessKey.length < 10 || !secretKey) {
+    try {
+      const envPath = path.join(process.cwd(), ".env.local");
+      if (fs.existsSync(envPath)) {
+        const raw = fs.readFileSync(envPath, "utf-8");
+        for (const line of raw.split("\n")) {
+          const trimmed = line.trim();
+          if (trimmed.startsWith("SHOOLINI_ACCESS_KEY=")) {
+            accessKey = trimmed.replace("SHOOLINI_ACCESS_KEY=", "").replace(/\\/g, "").replace(/^['"]|['"]$/g, "").trim();
+          }
+          if (trimmed.startsWith("SHOOLINI_SECRET_KEY=")) {
+            secretKey = trimmed.replace("SHOOLINI_SECRET_KEY=", "").replace(/^['"]|['"]$/g, "").trim();
+          }
+          if (trimmed.startsWith("SHOOLINI_API_HOST=")) {
+            host = trimmed.replace("SHOOLINI_API_HOST=", "").replace(/^['"]|['"]$/g, "").trim();
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("[Env Read Fallback Warning]:", e.message);
+    }
+  }
+
+  // Fallback defaults if env was missing
+  if (!accessKey || accessKey.length < 10) {
+    accessKey = "u$rf26e5b7ea589e91e738ca0e5e22db348";
+  }
+  if (!secretKey) {
+    secretKey = "2ee455f80eaa54f3e8d24b27bd99ae0393af5b5e";
+  }
+
+  return { host, accessKey, secretKey };
+}
+
+export async function POST(request, { params }) {
+  const session = await getSession();
+  if (!session?.user) return unauthorized();
+
+  try {
+    const { id } = await params;
+    const lead = await leadsRepo.findById(id);
+    if (!lead) return notFound("Lead");
+
+    const uniName = (lead.university_name || "").toLowerCase();
+
+    // Check if Shoolini University
+    const isShoolini =
+      uniName.includes("shoolini") ||
+      uniName.includes("shalloni") ||
+      uniName.includes("shaallni") ||
+      uniName.includes("shoolini university");
+
+    if (isShoolini) {
+      const { host, accessKey, secretKey } = getShooliniCredentials();
+
+      if (!accessKey || !secretKey) {
+        return err("Shoolini University API keys are not configured in .env.local", 500);
+      }
+
+      const phoneClean = (lead.phone || "").replace(/[^0-9]/g, "");
+
+      // 1. Check if lead already exists in Shoolini CRM by Phone
+      let isDuplicate = false;
+
+      if (phoneClean) {
+        try {
+          const phoneUrl = `${host.replace(/\/+$/, "")}/LeadManagement.svc/RetrieveLeadByPhoneNumber?accessKey=${encodeURIComponent(accessKey)}&secretKey=${encodeURIComponent(secretKey)}&phone=${encodeURIComponent(phoneClean)}`;
+          const phoneRes = await fetch(phoneUrl);
+          if (phoneRes.ok) {
+            const phoneData = await phoneRes.json().catch(() => null);
+            if (Array.isArray(phoneData) && phoneData.length > 0) {
+              isDuplicate = true;
+            }
+          }
+        } catch (e) {
+          console.warn("[Shoolini Check Phone Error]:", e.message);
+        }
+      }
+
+      // 2. Check if lead already exists by Email if phone didn't match
+      if (!isDuplicate && lead.email?.trim()) {
+        try {
+          const emailUrl = `${host.replace(/\/+$/, "")}/LeadManagement.svc/Leads.GetByEmailaddress?accessKey=${encodeURIComponent(accessKey)}&secretKey=${encodeURIComponent(secretKey)}&emailaddress=${encodeURIComponent(lead.email.trim())}`;
+          const emailRes = await fetch(emailUrl);
+          if (emailRes.ok) {
+            const emailData = await emailRes.json().catch(() => null);
+            if (Array.isArray(emailData) && emailData.length > 0) {
+              isDuplicate = true;
+            }
+          }
+        } catch (e) {
+          console.warn("[Shoolini Check Email Error]:", e.message);
+        }
+      }
+
+      // If already exists in LeadSquared CRM:
+      if (isDuplicate) {
+        await leadsRepo.updateLeadType(id, "Duplicate");
+        return ok({
+          success: true,
+          isDuplicate: true,
+          leadType: "Duplicate",
+          message: "Lead already exists in Shoolini University CRM! Type updated to Duplicate.",
+        });
+      }
+
+      // 3. Lead does not exist yet -> Push via Lead.Capture using ONLY: Lead Name, Phone Number, Email, Course Interested
+      const nameParts = (lead.student_name || "").trim().split(/\s+/);
+      const firstName = nameParts[0] || lead.student_name?.trim() || "Lead";
+      const lastName = nameParts.slice(1).join(" ") || "";
+
+      const captureUrl = `${host.replace(/\/+$/, "")}/LeadManagement.svc/Lead.Capture?accessKey=${encodeURIComponent(accessKey)}&secretKey=${encodeURIComponent(secretKey)}`;
+
+      const payload = [
+        { Attribute: "FirstName", Value: firstName },
+        { Attribute: "LastName", Value: lastName },
+        { Attribute: "Phone", Value: phoneClean },
+        { Attribute: "Mobile", Value: phoneClean },
+      ];
+
+      if (lead.email?.trim()) {
+        payload.push({ Attribute: "EmailAddress", Value: lead.email.trim() });
+      }
+
+      if (lead.course_name?.trim()) {
+        // Shoolini LeadSquared schema maps "Course Interested" to mx_COURSES and "Course" to mx_Course
+        payload.push({ Attribute: "mx_COURSES", Value: lead.course_name.trim() });
+        payload.push({ Attribute: "mx_Course", Value: lead.course_name.trim() });
+      }
+
+      const captureRes = await fetch(captureUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const rawText = await captureRes.text();
+      let captureData = null;
+      try {
+        captureData = JSON.parse(rawText);
+      } catch (parseErr) {
+        console.warn("[Shoolini JSON Parse Warning]:", parseErr.message, rawText);
+      }
+
+      const errMsg = (
+        captureData?.ExceptionMessage ||
+        (typeof captureData?.Message === "string" ? captureData.Message : "") ||
+        captureData?.ErrorMessage ||
+        ""
+      ).toLowerCase();
+
+      const errType = (captureData?.ExceptionType || "").toLowerCase();
+      const rawLower = (rawText || "").toLowerCase();
+
+      // Check if lead already exists in Shoolini LeadSquared CRM
+      const isDuplicateEntry =
+        errType.includes("duplicate") ||
+        errType.includes("unauthorized") ||
+        errMsg.includes("already exist") ||
+        errMsg.includes("already exists") ||
+        errMsg.includes("duplicate") ||
+        errMsg.includes("permission to update") ||
+        errMsg.includes("same email") ||
+        errMsg.includes("same phone") ||
+        errMsg.includes("conflict") ||
+        errMsg.includes("already present") ||
+        rawLower.includes("duplicate") ||
+        rawLower.includes("already exist") ||
+        rawLower.includes("permission to update") ||
+        (captureData?.Status === "Success" && captureData?.Message?.IsCreated === false);
+
+      if (isDuplicateEntry) {
+        await leadsRepo.updateLeadType(id, "Duplicate");
+        return ok({
+          success: true,
+          isDuplicate: true,
+          leadType: "Duplicate",
+          message: "Lead already exists in Shoolini University CRM! Type updated to Duplicate.",
+        });
+      }
+
+      // Check for clean successful creation
+      if (
+        (captureData?.Status === "Success" || captureRes.ok) &&
+        captureData?.Status !== "Error"
+      ) {
+        await leadsRepo.updateLeadType(id, "Primary");
+        return ok({
+          success: true,
+          isDuplicate: false,
+          leadType: "Primary",
+          message: "Lead successfully pushed to Shoolini University CRM! Type updated to Primary.",
+          data: captureData,
+        });
+      }
+
+      // If genuine other error
+      const displayError =
+        captureData?.ExceptionMessage ||
+        (typeof captureData?.Message === "string" ? captureData.Message : null) ||
+        captureData?.ErrorMessage ||
+        "Failed to push lead to Shoolini University CRM";
+
+      return err(displayError, 400);
+    }
+
+    // For other universities where API hasn't been configured yet
+    return err(
+      `Push API for "${lead.university_name || "selected university"}" will be configured soon.`
+    );
+  } catch (e) {
+    return serverError(e);
+  }
+}
