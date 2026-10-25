@@ -17,6 +17,8 @@ CREATE TABLE IF NOT EXISTS users (
   organization_name VARCHAR(255),
   address         TEXT,
   parent_center_id INT NULL,
+  billing_access  BOOLEAN DEFAULT FALSE,
+  billing_password_hash VARCHAR(255) NULL,
   is_active       BOOLEAN DEFAULT TRUE,
   created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -71,3 +73,56 @@ CREATE TABLE IF NOT EXISTS leads (
   FOREIGN KEY (center_id)      REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (subcenter_id)   REFERENCES users(id) ON DELETE SET NULL
 );
+
+-- ============================================================
+-- INVOICES (Billing Section)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS invoices (
+  id              INT PRIMARY KEY AUTO_INCREMENT,
+  unit_id         INT NOT NULL,
+  invoice_number  VARCHAR(100) NOT NULL,
+  invoice_date    DATE NOT NULL,
+  invoice_month   VARCHAR(20) NOT NULL,
+  invoice_year    INT NOT NULL,
+  amount          DECIMAL(12, 2) NOT NULL,
+  signed_by       VARCHAR(255) NOT NULL,
+  file_url        TEXT NOT NULL,
+  file_key        VARCHAR(500) NOT NULL,
+  file_name       VARCHAR(255) NOT NULL,
+  file_size       INT NULL,
+  status          ENUM('Pending', 'Approved', 'Rejected') NOT NULL DEFAULT 'Pending',
+  admin_remarks   TEXT NULL,
+  reviewed_by     INT NULL,
+  reviewed_at     TIMESTAMP NULL,
+  created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (unit_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (reviewed_by) REFERENCES users(id) ON DELETE SET NULL
+);
+
+-- ============================================================
+-- BILLING NOTIFICATIONS
+-- ============================================================
+CREATE TABLE IF NOT EXISTS billing_notifications (
+  id              INT PRIMARY KEY AUTO_INCREMENT,
+  title           VARCHAR(255) NOT NULL,
+  message         TEXT NOT NULL,
+  type            ENUM('announcement', 'instruction', 'reminder', 'alert') NOT NULL DEFAULT 'announcement',
+  created_by      INT NOT NULL,
+  target_all_units BOOLEAN DEFAULT TRUE,
+  created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS billing_notification_recipients (
+  id              INT PRIMARY KEY AUTO_INCREMENT,
+  notification_id INT NOT NULL,
+  unit_id         INT NOT NULL,
+  is_read         BOOLEAN DEFAULT FALSE,
+  read_at         TIMESTAMP NULL,
+  created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (notification_id) REFERENCES billing_notifications(id) ON DELETE CASCADE,
+  FOREIGN KEY (unit_id) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE KEY unique_notif_unit (notification_id, unit_id)
+);
+

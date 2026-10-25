@@ -8,9 +8,10 @@ import {
   Users,
   ClipboardList,
   GraduationCap,
+  ReceiptText,
 } from "lucide-react";
 
-/** @type {Record<string, Array<{label: string, href: string, icon: any}>>} */
+/** @type {Record<string, Array<{label: string, href: string, icon: any, requiresBillingAccess?: boolean}>>} */
 export const NAV_ITEMS = {
   admin: [
     { label: "Dashboard",   href: "/admin",             icon: LayoutDashboard },
@@ -18,11 +19,13 @@ export const NAV_ITEMS = {
     { label: "Associates",  href: "/admin/subcenters",  icon: Users           },
     { label: "All Leads",   href: "/admin/leads",       icon: ClipboardList   },
     { label: "Colleges",    href: "/admin/colleges",    icon: GraduationCap   },
+    { label: "Billing",     href: "/admin/billing",     icon: ReceiptText     },
   ],
   center: [
     { label: "Dashboard",   href: "/center",            icon: LayoutDashboard },
     { label: "Leads",       href: "/center/leads",      icon: ClipboardList   },
     { label: "Associates",  href: "/center/subcenters", icon: Users           },
+    { label: "Billing",     href: "/center/billing",    icon: ReceiptText, requiresBillingAccess: true },
   ],
   subcenter: [
     { label: "Dashboard",   href: "/subcenter",         icon: LayoutDashboard },

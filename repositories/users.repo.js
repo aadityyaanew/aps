@@ -18,7 +18,9 @@ export async function findByEmail(email) {
 export async function findById(id) {
   return queryOne(
     `SELECT id, name, email, role, phone, organization_name,
-            address, parent_center_id, is_active, created_at
+            address, parent_center_id, billing_access,
+            (billing_password_hash IS NOT NULL) AS has_billing_password,
+            is_active, created_at
      FROM users WHERE id = ? LIMIT 1`,
     [id]
   );
@@ -27,7 +29,7 @@ export async function findById(id) {
 /** Find a user with password_hash by ID (for password verification) */
 export async function findByIdWithPassword(id) {
   return queryOne(
-    `SELECT id, name, email, password_hash, role, phone, organization_name,
+    `SELECT id, name, email, password_hash, billing_password_hash, billing_access, role, phone, organization_name,
             address, parent_center_id, is_active, created_at
      FROM users WHERE id = ? LIMIT 1`,
     [id]
@@ -38,7 +40,8 @@ export async function findByIdWithPassword(id) {
 export async function findAllCenters() {
   return query(
     `SELECT u.id, u.name, u.email, u.phone, u.organization_name,
-            u.address, u.is_active, u.created_at,
+            u.address, u.billing_access, (u.billing_password_hash IS NOT NULL) AS has_billing_password,
+            u.is_active, u.created_at,
             COUNT(s.id) AS subcenter_count
      FROM users u
      LEFT JOIN users s ON s.parent_center_id = u.id AND s.role = 'subcenter'
@@ -46,6 +49,16 @@ export async function findAllCenters() {
      GROUP BY u.id
      ORDER BY u.created_at DESC`
   );
+}
+
+/** Set unit billing access (grant or revoke) */
+export async function setUnitBillingAccess(id, billingAccess) {
+  return execute(`UPDATE users SET billing_access = ?, updated_at = NOW() WHERE id = ?`, [Boolean(billingAccess), id]);
+}
+
+/** Set or reset unit billing password */
+export async function setUnitBillingPassword(id, passwordHash) {
+  return execute(`UPDATE users SET billing_password_hash = ?, updated_at = NOW() WHERE id = ?`, [passwordHash, id]);
 }
 
 /** Get all subcenters optionally filtered by parent center */

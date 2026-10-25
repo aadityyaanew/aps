@@ -47,6 +47,18 @@ export async function updateCenter(id, data) {
     passwordHash = await hashPassword(data.password.trim());
   }
 
+  if (data.billing_access !== undefined) {
+    await usersRepo.setUnitBillingAccess(id, Boolean(data.billing_access));
+  }
+
+  if (data.billing_password && data.billing_password.trim()) {
+    if (data.billing_password.trim().length < 4) {
+      throw new Error("Billing password must be at least 4 characters long.");
+    }
+    const billingHash = await hashPassword(data.billing_password.trim());
+    await usersRepo.setUnitBillingPassword(id, billingHash);
+  }
+
   return usersRepo.updateUserDetails(id, {
     name:              data.name,
     email:             data.email,

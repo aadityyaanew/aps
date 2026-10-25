@@ -25,6 +25,8 @@ export default function EditCenterDialog({ open, onClose, onSubmit, center }) {
   const [organizationName, setOrganizationName] = useState("");
   const [address, setAddress] = useState("");
   const [isActive, setIsActive] = useState("true");
+  const [billingAccess, setBillingAccess] = useState("false");
+  const [billingPassword, setBillingPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -37,6 +39,8 @@ export default function EditCenterDialog({ open, onClose, onSubmit, center }) {
       setOrganizationName(center.organization_name || "");
       setAddress(center.address || "");
       setIsActive(center.is_active ? "true" : "false");
+      setBillingAccess(center.billing_access ? "true" : "false");
+      setBillingPassword("");
       setError("");
     }
   }, [center, open]);
@@ -51,6 +55,10 @@ export default function EditCenterDialog({ open, onClose, onSubmit, center }) {
       setError("Password must be at least 6 characters.");
       return;
     }
+    if (billingPassword && billingPassword.length < 4) {
+      setError("Billing password must be at least 4 characters.");
+      return;
+    }
 
     setLoading(true);
     setError("");
@@ -59,6 +67,8 @@ export default function EditCenterDialog({ open, onClose, onSubmit, center }) {
         name:              name.trim(),
         email:             email.trim(),
         password:          password ? password.trim() : undefined,
+        billing_access:    billingAccess === "true",
+        billing_password:  billingPassword ? billingPassword.trim() : undefined,
         phone:             phone.trim() || null,
         organization_name: organizationName.trim() || null,
         address:           address.trim() || null,
@@ -174,6 +184,38 @@ export default function EditCenterDialog({ open, onClose, onSubmit, center }) {
             <p className="text-[11px] text-gray-400">
               Deactivating disables login access only. Existing punched leads remain safe and intact.
             </p>
+          </div>
+
+          <div className="pt-2 border-t border-slate-100 space-y-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="unit-billing-access">Billing Section Access</Label>
+              <Select value={billingAccess} onValueChange={setBillingAccess}>
+                <SelectTrigger id="unit-billing-access">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="true">Authorized (Billing Enabled)</SelectItem>
+                  <SelectItem value="false">Restricted (Billing Disabled)</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-[11px] text-gray-400">
+                Grant or revoke access to the Billing section and invoice submission.
+              </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="unit-billing-pwd" className="flex items-center justify-between">
+                <span>Reset Billing Password</span>
+                <span className="text-[11px] text-gray-400">Leave blank to keep unchanged</span>
+              </Label>
+              <Input
+                id="unit-billing-pwd"
+                type="password"
+                placeholder="New billing password (optional)"
+                value={billingPassword}
+                onChange={(e) => setBillingPassword(e.target.value)}
+              />
+            </div>
           </div>
 
           {error && (

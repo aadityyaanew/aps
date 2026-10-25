@@ -27,6 +27,7 @@ export default function CentersTable({ centers, isLoading, onEdit, onToggleActiv
               <TableHead>Email (Login)</TableHead>
               <TableHead>Phone</TableHead>
               <TableHead>Associates</TableHead>
+              <TableHead>Billing</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -40,6 +41,18 @@ export default function CentersTable({ centers, isLoading, onEdit, onToggleActiv
                 <TableCell className="text-sm">{c.phone ?? "—"}</TableCell>
                 <TableCell>
                   <Badge variant="secondary">{c.subcenter_count ?? 0}</Badge>
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant="outline"
+                    className={`text-[11px] ${
+                      c.billing_access
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                        : "bg-slate-50 text-slate-500 border-slate-200"
+                    }`}
+                  >
+                    {c.billing_access ? "Authorized" : "Disabled"}
+                  </Badge>
                 </TableCell>
                 <TableCell>
                   <Badge variant={c.is_active ? "default" : "destructive"}>
