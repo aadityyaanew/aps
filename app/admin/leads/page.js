@@ -19,7 +19,7 @@ export default function AdminLeadsPage() {
     <div className="space-y-6">
       <PageHeader
         title="All Leads"
-        description={`${leads.length} total leads across all centers.`}
+        description={`${leads.length} total leads across all units.`}
         action={
           <Button
             onClick={() => setOpenAdd(true)}

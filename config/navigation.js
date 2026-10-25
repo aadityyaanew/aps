@@ -14,14 +14,14 @@ import {
 export const NAV_ITEMS = {
   admin: [
     { label: "Dashboard",   href: "/admin",             icon: LayoutDashboard },
-    { label: "Centers",     href: "/admin/centers",     icon: Building2       },
-    { label: "Sub Centers", href: "/admin/subcenters",  icon: Users           },
+    { label: "Units",       href: "/admin/centers",     icon: Building2       },
+    { label: "Associates",  href: "/admin/subcenters",  icon: Users           },
     { label: "All Leads",   href: "/admin/leads",       icon: ClipboardList   },
   ],
   center: [
     { label: "Dashboard",   href: "/center",            icon: LayoutDashboard },
     { label: "Leads",       href: "/center/leads",      icon: ClipboardList   },
-    { label: "Sub Centers", href: "/center/subcenters", icon: Users           },
+    { label: "Associates",  href: "/center/subcenters", icon: Users           },
   ],
   subcenter: [
     { label: "Dashboard",   href: "/subcenter",         icon: LayoutDashboard },

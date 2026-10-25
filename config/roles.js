@@ -7,9 +7,9 @@ export const ROLES = {
 
 /** Role display labels */
 export const ROLE_LABELS = {
-  admin:      "Admin",
-  center:     "Center",
-  subcenter:  "Sub Center",
+  admin:      "Super Admin",
+  center:     "Unit",
+  subcenter:  "Associate",
 };
 
 /** Role home paths after login */

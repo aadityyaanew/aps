@@ -27,7 +27,7 @@ export default function SubcenterDashboard() {
   return (
     <div className="space-y-6">
       <WelcomeBanner
-        name={session?.user?.name ?? "Sub Center"}
+        name={session?.user?.name ?? "Associate"}
         subtitle="Track your leads and monitor their admission status."
       />
       <StatCardGrid items={stats} isLoading={isLoading} />

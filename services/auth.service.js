@@ -33,3 +33,55 @@ export async function authenticateUser(email, password) {
   const { password_hash, ...safeUser } = user;
   return safeUser;
 }
+
+/**
+ * Change password for any authenticated user.
+ */
+export async function changePassword(userId, currentPassword, newPassword) {
+  if (!currentPassword || !newPassword) {
+    throw new Error("Both current and new password are required.");
+  }
+  if (newPassword.length < 6) {
+    throw new Error("New password must be at least 6 characters long.");
+  }
+
+  const { findByIdWithPassword, updateUserPassword } = await import("@/repositories/users.repo");
+  const user = await findByIdWithPassword(userId);
+  if (!user) {
+    throw new Error("User not found.");
+  }
+
+  const isValid = await verifyPassword(currentPassword, user.password_hash);
+  if (!isValid) {
+    throw new Error("Current password is incorrect.");
+  }
+
+  const newHash = await hashPassword(newPassword);
+  await updateUserPassword(userId, newHash);
+  return { success: true };
+}
+
+/**
+ * Update user's own profile and credentials (e.g. for Super Admin or any user)
+ */
+export async function updateProfile(userId, { name, email, phone, organization_name, password }) {
+  const { updateUserDetails } = await import("@/repositories/users.repo");
+  let passwordHash = undefined;
+
+  if (password && password.trim()) {
+    if (password.trim().length < 6) {
+      throw new Error("Password must be at least 6 characters long.");
+    }
+    passwordHash = await hashPassword(password.trim());
+  }
+
+  await updateUserDetails(userId, {
+    name,
+    email,
+    phone,
+    organization_name,
+    passwordHash,
+  });
+
+  return { success: true };
+}

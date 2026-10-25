@@ -40,13 +40,26 @@ export function useCenters() {
     await mutate();
   }, [mutate]);
 
+  const toggleCenterActive = useCallback(async (id, isActive) => {
+    const res = await fetch(`/api/admin/centers/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ is_active: isActive }),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error ?? "Failed to update unit status");
+    await mutate();
+    return json.data;
+  }, [mutate]);
+
   return {
-    centers:      data ?? [],
+    centers:            data ?? [],
     isLoading,
-    isError:      !!error,
+    isError:            !!error,
     createCenter,
     updateCenter,
+    toggleCenterActive,
     deleteCenter,
-    refresh:      mutate,
+    refresh:            mutate,
   };
 }

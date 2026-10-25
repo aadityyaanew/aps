@@ -24,6 +24,16 @@ export async function findById(id) {
   );
 }
 
+/** Find a user with password_hash by ID (for password verification) */
+export async function findByIdWithPassword(id) {
+  return queryOne(
+    `SELECT id, name, email, password_hash, role, phone, organization_name,
+            address, parent_center_id, is_active, created_at
+     FROM users WHERE id = ? LIMIT 1`,
+    [id]
+  );
+}
+
 /** Get all centers (role = 'center') */
 export async function findAllCenters() {
   return query(
@@ -66,18 +76,70 @@ export async function createUser({ name, email, passwordHash, role, phone, organ
   return result.insertId;
 }
 
-/** Update center / subcenter details */
+/** Flexible user details & credentials updater */
+export async function updateUserDetails(id, { name, email, phone, organization_name, address, parent_center_id, is_active, passwordHash }) {
+  const updates = [];
+  const params = [];
+
+  if (name !== undefined) {
+    updates.push("name = ?");
+    params.push(name);
+  }
+  if (email !== undefined) {
+    updates.push("email = ?");
+    params.push(email);
+  }
+  if (phone !== undefined) {
+    updates.push("phone = ?");
+    params.push(phone ?? null);
+  }
+  if (organization_name !== undefined) {
+    updates.push("organization_name = ?");
+    params.push(organization_name ?? null);
+  }
+  if (address !== undefined) {
+    updates.push("address = ?");
+    params.push(address ?? null);
+  }
+  if (parent_center_id !== undefined) {
+    updates.push("parent_center_id = ?");
+    params.push(parent_center_id ? parseInt(parent_center_id, 10) : null);
+  }
+  if (is_active !== undefined) {
+    updates.push("is_active = ?");
+    params.push(Boolean(is_active));
+  }
+  if (passwordHash) {
+    updates.push("password_hash = ?");
+    params.push(passwordHash);
+  }
+
+  if (updates.length === 0) return { affectedRows: 0 };
+
+  updates.push("updated_at = NOW()");
+  params.push(id);
+
+  return execute(`UPDATE users SET ${updates.join(", ")} WHERE id = ?`, params);
+}
+
+/** Update user password hash directly */
+export async function updateUserPassword(id, passwordHash) {
+  return execute(`UPDATE users SET password_hash = ?, updated_at = NOW() WHERE id = ?`, [passwordHash, id]);
+}
+
+/** Set user active status (deactivate / activate) without affecting any leads */
+export async function setUserActive(id, isActive) {
+  return execute(`UPDATE users SET is_active = ?, updated_at = NOW() WHERE id = ?`, [Boolean(isActive), id]);
+}
+
+/** Update center / subcenter details (legacy helper) */
 export async function updateUser(id, { name, phone, organization_name, address, is_active }) {
-  return execute(
-    `UPDATE users SET name=?, phone=?, organization_name=?, address=?, is_active=?, updated_at=NOW()
-     WHERE id=?`,
-    [name, phone ?? null, organization_name ?? null, address ?? null, is_active ?? true, id]
-  );
+  return updateUserDetails(id, { name, phone, organization_name, address, is_active });
 }
 
 /** Soft delete (deactivate) a center */
 export async function deactivateUser(id) {
-  return execute(`UPDATE users SET is_active=FALSE, updated_at=NOW() WHERE id=?`, [id]);
+  return setUserActive(id, false);
 }
 
 /** Hard delete a center (cascades to leads/subcenters via FK) */

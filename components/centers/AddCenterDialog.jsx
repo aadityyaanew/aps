@@ -11,7 +11,7 @@ import { Loader2 } from "lucide-react";
 
 const EMPTY = { name: "", email: "", password: "", phone: "", organization_name: "", address: "" };
 
-export default function AddCenterDialog({ open, onClose, onSubmit, title = "Add New Center" }) {
+export default function AddCenterDialog({ open, onClose, onSubmit, title = "Add New Unit" }) {
   const [values, setValues]   = useState(EMPTY);
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState("");
@@ -25,7 +25,7 @@ export default function AddCenterDialog({ open, onClose, onSubmit, title = "Add 
     }
     setError(""); setLoading(true);
     try { await onSubmit(values); setValues(EMPTY); onClose(); }
-    catch (e) { setError(e.message ?? "Failed to create."); }
+    catch (e) { setError(e.message ?? "Failed to create unit."); }
     finally { setLoading(false); }
   }
 
@@ -64,7 +64,7 @@ export default function AddCenterDialog({ open, onClose, onSubmit, title = "Add 
           <Button variant="outline" onClick={onClose} disabled={loading}>Cancel</Button>
           <Button onClick={handleSubmit} disabled={loading} className="bg-[#8B0000] hover:bg-[#a01515] text-white">
             {loading && <Loader2 size={14} className="mr-2 animate-spin" />}
-            Create Center
+            Create Unit
           </Button>
         </DialogFooter>
       </DialogContent>

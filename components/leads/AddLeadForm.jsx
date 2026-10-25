@@ -54,18 +54,18 @@ export default function AddLeadForm({ values, onChange, isAdmin = false }) {
 
       {isAdmin && (
         <div className="space-y-1.5 sm:col-span-2">
-          <Label htmlFor="lead-center">Assign Center *</Label>
+          <Label htmlFor="lead-center">Assign Unit *</Label>
           <Select
             value={values.centerId ? String(values.centerId) : ""}
             onValueChange={(v) => set("centerId", v)}
           >
             <SelectTrigger id="lead-center">
-              <SelectValue placeholder="Select target center" />
+              <SelectValue placeholder="Select target unit" />
             </SelectTrigger>
             <SelectContent>
               {centers.map((c) => (
                 <SelectItem key={c.id} value={String(c.id)}>
-                  {c.organization_name || c.name}
+                  {c.organization_name || c.name} {!c.is_active ? "(Inactive)" : ""}
                 </SelectItem>
               ))}
             </SelectContent>

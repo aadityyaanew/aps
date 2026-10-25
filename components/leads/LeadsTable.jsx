@@ -61,11 +61,11 @@ export default function LeadsTable({
                 <TableHead className="font-semibold text-slate-700">Contact</TableHead>
                 <TableHead className="font-semibold text-slate-700">University / Course</TableHead>
                 <TableHead className="font-semibold text-slate-700">Type</TableHead>
-                {showCenter && <TableHead className="font-semibold text-slate-700">Center</TableHead>}
-                {showSubcenter && <TableHead className="font-semibold text-slate-700">Sub Center</TableHead>}
+                {showCenter && <TableHead className="font-semibold text-slate-700">Unit</TableHead>}
+                {showSubcenter && <TableHead className="font-semibold text-slate-700">Associate</TableHead>}
                 <TableHead className="font-semibold text-slate-700">Status</TableHead>
                 <TableHead className="font-semibold text-slate-700">ADM Status</TableHead>
-                <TableHead className="font-semibold text-slate-700">Date</TableHead>
+                <TableHead className="font-semibold text-slate-700">Punched Date & Time</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -145,14 +145,27 @@ export default function LeadsTable({
                       <AdmStatusBadge status={lead.adm_status} />
                     )}
                   </TableCell>
-                  <TableCell className="text-xs text-slate-500 whitespace-nowrap">
-                    {lead.created_at
-                      ? new Date(lead.created_at).toLocaleDateString("en-IN", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                        })
-                      : "—"}
+                  <TableCell className="text-xs whitespace-nowrap">
+                    {lead.created_at ? (
+                      <div className="flex flex-col gap-0.5">
+                        <span className="font-medium text-slate-800">
+                          {new Date(lead.created_at).toLocaleDateString("en-IN", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </span>
+                        <span className="text-[11px] text-slate-500 font-normal">
+                          {new Date(lead.created_at).toLocaleTimeString("en-IN", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true,
+                          })}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-slate-400">—</span>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}

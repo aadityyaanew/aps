@@ -29,8 +29,8 @@ export default function CenterDashboard() {
   return (
     <div className="space-y-6">
       <WelcomeBanner
-        name={session?.user?.name ?? "Center"}
-        subtitle="Monitor all your leads and sub centers in one place."
+        name={session?.user?.name ?? "Unit"}
+        subtitle="Monitor all your leads and associates in one place."
       />
       <StatCardGrid items={stats} isLoading={ll || ls} />
     </div>

@@ -37,9 +37,56 @@ export async function createSubcenter({ name, email, password, phone, organizati
   });
 }
 
-/** Update center/subcenter details */
+/** Update center details and credentials */
+export async function updateCenter(id, data) {
+  let passwordHash = undefined;
+  if (data.password && data.password.trim()) {
+    if (data.password.trim().length < 6) {
+      throw new Error("Password must be at least 6 characters long.");
+    }
+    passwordHash = await hashPassword(data.password.trim());
+  }
+
+  return usersRepo.updateUserDetails(id, {
+    name:              data.name,
+    email:             data.email,
+    phone:             data.phone,
+    organization_name: data.organization_name,
+    address:           data.address,
+    is_active:         data.is_active,
+    passwordHash,
+  });
+}
+
+/** Update subcenter details and credentials */
+export async function updateSubcenter(id, data) {
+  let passwordHash = undefined;
+  if (data.password && data.password.trim()) {
+    if (data.password.trim().length < 6) {
+      throw new Error("Password must be at least 6 characters long.");
+    }
+    passwordHash = await hashPassword(data.password.trim());
+  }
+
+  return usersRepo.updateUserDetails(id, {
+    name:              data.name,
+    email:             data.email,
+    phone:             data.phone,
+    organization_name: data.organization_name,
+    parent_center_id:  data.parent_center_id ?? data.parentCenterId,
+    is_active:         data.is_active,
+    passwordHash,
+  });
+}
+
+/** Toggle user active status (deactivate / activate) */
+export async function toggleUserActive(id, isActive) {
+  return usersRepo.setUserActive(id, isActive);
+}
+
+/** Update center/subcenter details (legacy wrapper) */
 export async function updateUser(id, data) {
-  return usersRepo.updateUser(id, data);
+  return updateCenter(id, data);
 }
 
 /** Delete a center (hard delete — cascades) */
@@ -49,5 +96,10 @@ export async function deleteCenter(id) {
 
 /** Get center by ID */
 export async function getCenterById(id) {
+  return usersRepo.findById(id);
+}
+
+/** Get subcenter by ID */
+export async function getSubcenterById(id) {
   return usersRepo.findById(id);
 }
