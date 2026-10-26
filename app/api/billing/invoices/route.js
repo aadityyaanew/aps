@@ -51,20 +51,40 @@ export async function POST(req) {
 
     const formData = await req.formData();
     const invoiceNumber = formData.get("invoice_number");
-    const invoiceDate = formData.get("invoice_date");
-    const invoiceMonth = formData.get("invoice_month");
-    const invoiceYear = formData.get("invoice_year");
     const amount = formData.get("amount");
     const signedBy = formData.get("signed_by");
     const file = formData.get("file");
+
+    // Automatically compute date, month, and year from server timestamp in Asia/Kolkata
+    // to strictly prevent any client-side manipulation of date, time, month, or year
+    const now = new Date();
+    const serverInvoiceDate = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(now);
+
+    const serverInvoiceMonth = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Kolkata",
+      month: "long",
+    }).format(now);
+
+    const serverInvoiceYear = parseInt(
+      new Intl.DateTimeFormat("en-US", {
+        timeZone: "Asia/Kolkata",
+        year: "numeric",
+      }).format(now),
+      10
+    );
 
     // If admin is testing/uploading on behalf of a unit, allow target_unit_id, otherwise use user.id
     const targetUnitId = user.role === "admin" && formData.get("unit_id") 
       ? parseInt(formData.get("unit_id"), 10) 
       : user.id;
 
-    if (!invoiceNumber || !invoiceDate || !invoiceMonth || !invoiceYear || !amount || !signedBy || !file) {
-      return err("All fields including document file are mandatory.");
+    if (!invoiceNumber || !amount || !signedBy || !file) {
+      return err("All fields (Invoice Number, Amount, Signed By, and Document) are mandatory.");
     }
 
     // Validate file type
@@ -88,9 +108,9 @@ export async function POST(req) {
     const invoice = await submitUnitInvoice({
       unitId: targetUnitId,
       invoiceNumber: String(invoiceNumber),
-      invoiceDate: String(invoiceDate),
-      invoiceMonth: String(invoiceMonth),
-      invoiceYear: String(invoiceYear),
+      invoiceDate: serverInvoiceDate,
+      invoiceMonth: serverInvoiceMonth,
+      invoiceYear: serverInvoiceYear,
       amount: String(amount),
       signedBy: String(signedBy),
       file,

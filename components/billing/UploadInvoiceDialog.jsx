@@ -3,7 +3,7 @@
  * UploadInvoiceDialog.jsx — Form dialog for submitting invoices with Cloudflare R2 upload.
  * Mandatory fields: Invoice Number, Date, Month & Year, Amount (₹), Signed By, Document Upload.
  */
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -24,25 +24,65 @@ import {
   AlertCircle,
   CheckCircle2,
   IndianRupee,
+  Calendar,
+  Clock,
+  Lock,
+  ShieldCheck,
 } from "lucide-react";
-
-const MONTHS = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
-
-const CURRENT_YEAR = new Date().getFullYear();
-const YEARS = [CURRENT_YEAR - 2, CURRENT_YEAR - 1, CURRENT_YEAR, CURRENT_YEAR + 1];
 
 export default function UploadInvoiceDialog({ open, onClose, onSuccess, unitId = null, units = [] }) {
   const [invoiceNumber, setInvoiceNumber] = useState("");
-  const [invoiceDate, setInvoiceDate] = useState(() => new Date().toISOString().split("T")[0]);
-  const [invoiceMonth, setInvoiceMonth] = useState(() => MONTHS[new Date().getMonth()]);
-  const [invoiceYear, setInvoiceYear] = useState(() => String(CURRENT_YEAR));
   const [amount, setAmount] = useState("");
   const [signedBy, setSignedBy] = useState("");
   const [file, setFile] = useState(null);
   const [selectedUnitId, setSelectedUnitId] = useState(unitId ? String(unitId) : "");
+
+  // Auto-fetch real-time date, time, month, and year (cannot be manipulated)
+  const [currentDateTime, setCurrentDateTime] = useState(() => {
+    const now = new Date();
+    return {
+      dateFormatted: now.toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }),
+      timeFormatted: now.toLocaleTimeString("en-IN", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+      }),
+      month: now.toLocaleString("en-US", { month: "long" }),
+      year: String(now.getFullYear()),
+      rawDate: now.toISOString().split("T")[0],
+    };
+  });
+
+  useEffect(() => {
+    if (!open) return;
+    const update = () => {
+      const now = new Date();
+      setCurrentDateTime({
+        dateFormatted: now.toLocaleDateString("en-IN", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        }),
+        timeFormatted: now.toLocaleTimeString("en-IN", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: true,
+        }),
+        month: now.toLocaleString("en-US", { month: "long" }),
+        year: String(now.getFullYear()),
+        rawDate: now.toISOString().split("T")[0],
+      });
+    };
+    update();
+    const interval = setInterval(update, 1000);
+    return () => clearInterval(interval);
+  }, [open]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -50,9 +90,6 @@ export default function UploadInvoiceDialog({ open, onClose, onSuccess, unitId =
 
   const resetForm = () => {
     setInvoiceNumber("");
-    setInvoiceDate(new Date().toISOString().split("T")[0]);
-    setInvoiceMonth(MONTHS[new Date().getMonth()]);
-    setInvoiceYear(String(CURRENT_YEAR));
     setAmount("");
     setSignedBy("");
     setFile(null);
@@ -91,18 +128,6 @@ export default function UploadInvoiceDialog({ open, onClose, onSuccess, unitId =
       setError("Invoice Number is mandatory.");
       return;
     }
-    if (!invoiceDate) {
-      setError("Invoice Date is mandatory.");
-      return;
-    }
-    if (!invoiceMonth) {
-      setError("Invoice Month is mandatory.");
-      return;
-    }
-    if (!invoiceYear) {
-      setError("Invoice Year is mandatory.");
-      return;
-    }
     if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
       setError("Please provide a valid Invoice Amount (₹).");
       return;
@@ -122,9 +147,9 @@ export default function UploadInvoiceDialog({ open, onClose, onSuccess, unitId =
     try {
       const formData = new FormData();
       formData.append("invoice_number", invoiceNumber.trim());
-      formData.append("invoice_date", invoiceDate);
-      formData.append("invoice_month", invoiceMonth);
-      formData.append("invoice_year", invoiceYear);
+      formData.append("invoice_date", currentDateTime.rawDate);
+      formData.append("invoice_month", currentDateTime.month);
+      formData.append("invoice_year", currentDateTime.year);
       formData.append("amount", amount);
       formData.append("signed_by", signedBy.trim());
       formData.append("file", file);
@@ -191,62 +216,70 @@ export default function UploadInvoiceDialog({ open, onClose, onSuccess, unitId =
             </div>
           )}
 
-          {/* Row 1: Invoice Number & Date */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            <div className="space-y-1.5">
-              <Label htmlFor="inv-num">Invoice Number *</Label>
-              <Input
-                id="inv-num"
-                value={invoiceNumber}
-                onChange={(e) => setInvoiceNumber(e.target.value)}
-                placeholder="e.g. INV-2026-001"
-                required
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="inv-date">Invoice Date *</Label>
-              <Input
-                id="inv-date"
-                type="date"
-                value={invoiceDate}
-                onChange={(e) => setInvoiceDate(e.target.value)}
-                required
-              />
-            </div>
+          {/* Invoice Number */}
+          <div className="space-y-1.5">
+            <Label htmlFor="inv-num">Invoice Number *</Label>
+            <Input
+              id="inv-num"
+              value={invoiceNumber}
+              onChange={(e) => setInvoiceNumber(e.target.value)}
+              placeholder="e.g. INV-2026-001"
+              required
+            />
           </div>
 
-          {/* Row 2: Month & Year */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            <div className="space-y-1.5">
-              <Label htmlFor="inv-month">Invoice Month *</Label>
-              <Select value={invoiceMonth} onValueChange={setInvoiceMonth}>
-                <SelectTrigger id="inv-month">
-                  <SelectValue placeholder="Select month" />
-                </SelectTrigger>
-                <SelectContent>
-                  {MONTHS.map((m) => (
-                    <SelectItem key={m} value={m}>
-                      {m}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          {/* Auto-Fetched Date, Time & Year (Protected from manipulation) */}
+          <div className="rounded-xl border border-slate-200/90 bg-slate-50/70 p-3.5 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold tracking-wider uppercase text-slate-500 flex items-center gap-1.5">
+                <Lock size={12} className="text-slate-400" />
+
+              </span>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200/60">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Live
+              </span>
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="inv-year">Invoice Year *</Label>
-              <Select value={invoiceYear} onValueChange={setInvoiceYear}>
-                <SelectTrigger id="inv-year">
-                  <SelectValue placeholder="Select year" />
-                </SelectTrigger>
-                <SelectContent>
-                  {YEARS.map((y) => (
-                    <SelectItem key={y} value={String(y)}>
-                      {y}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-0.5">
+              {/* Date */}
+              <div className="bg-white border border-slate-200/80 rounded-lg p-2.5 shadow-2xs">
+                <div className="text-[10px] font-medium text-slate-400 flex items-center gap-1">
+                  <Calendar size={11} className="text-slate-400" />
+                  Date
+                </div>
+                <div className="text-xs font-semibold text-slate-800 mt-1">
+                  {currentDateTime.dateFormatted || "Fetching..."}
+                </div>
+              </div>
+
+              {/* Time */}
+              <div className="bg-white border border-slate-200/80 rounded-lg p-2.5 shadow-2xs">
+                <div className="text-[10px] font-medium text-slate-400 flex items-center gap-1">
+                  <Clock size={11} className="text-slate-400" />
+                  Time
+                </div>
+                <div className="text-xs font-semibold text-slate-800 mt-1 font-mono">
+                  {currentDateTime.timeFormatted || "Fetching..."}
+                </div>
+              </div>
+
+              {/* Billing Period (Month & Year) */}
+              <div className="bg-white border border-slate-200/80 rounded-lg p-2.5 shadow-2xs">
+                <div className="text-[10px] font-medium text-slate-400 flex items-center gap-1">
+                  <ShieldCheck size={11} className="text-slate-400" />
+                  Billing Period
+                </div>
+                <div className="text-xs font-semibold text-[#8B0000] mt-1">
+                  {currentDateTime.month} {currentDateTime.year}
+                </div>
+              </div>
             </div>
+
+            <p className="text-[11px] text-slate-500 flex items-center gap-1 pt-0.5">
+              <Lock size={11} className="text-slate-400 shrink-0" />
+              Date, time, month, and year are locked to the system clock to prevent manipulation.
+            </p>
           </div>
 
           {/* Row 3: Amount & Signed By */}

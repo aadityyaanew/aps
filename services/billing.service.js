@@ -129,14 +129,33 @@ export async function submitUnitInvoice({
   }
 
   if (!invoiceNumber?.trim()) throw new Error("Invoice Number is required.");
-  if (!invoiceDate) throw new Error("Invoice Date is required.");
-  if (!invoiceMonth?.trim()) throw new Error("Invoice Month is required.");
-  if (!invoiceYear) throw new Error("Invoice Year is required.");
   if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
     throw new Error("Valid Invoice Amount is required.");
   }
   if (!signedBy?.trim()) throw new Error("Invoice Signed By is required.");
   if (!file) throw new Error("Invoice document is required.");
+
+  // Enforce server-authoritative date, month, and year (Asia/Kolkata) to prevent manipulation
+  const now = new Date();
+  const safeInvoiceDate = invoiceDate || new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(now);
+
+  const safeInvoiceMonth = invoiceMonth?.trim() || new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Kolkata",
+    month: "long",
+  }).format(now);
+
+  const safeInvoiceYear = invoiceYear ? parseInt(invoiceYear, 10) : parseInt(
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+    }).format(now),
+    10
+  );
 
   // Convert File to Buffer
   const arrayBuffer = await file.arrayBuffer();
@@ -153,9 +172,9 @@ export async function submitUnitInvoice({
   const invoiceId = await createInvoice({
     unit_id: unitId,
     invoice_number: invoiceNumber.trim(),
-    invoice_date: invoiceDate,
-    invoice_month: invoiceMonth.trim(),
-    invoice_year: parseInt(invoiceYear, 10),
+    invoice_date: safeInvoiceDate,
+    invoice_month: safeInvoiceMonth,
+    invoice_year: safeInvoiceYear,
     amount: parseFloat(amount),
     signed_by: signedBy.trim(),
     file_url: url,
