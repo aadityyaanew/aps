@@ -3,6 +3,8 @@ import { ok, err, unauthorized, forbidden, serverError } from "@/lib/api-respons
 import { findInvoicesByUnit, findAllInvoices } from "@/repositories/invoices.repo";
 import { submitUnitInvoice } from "@/services/billing.service";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req) {
   try {
     const user = await getCurrentUser();
@@ -96,6 +98,7 @@ export async function POST(req) {
 
     return ok(invoice, 201);
   } catch (error) {
-    return serverError(error);
+    console.error("[Invoice Upload Error]:", error);
+    return err(error.message || "Failed to upload invoice.", 500);
   }
 }
