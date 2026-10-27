@@ -7,6 +7,7 @@
 import { ok, err, unauthorized, serverError, notFound } from "@/lib/api-response";
 import { getSession } from "@/lib/session";
 import * as leadsRepo from "@/repositories/leads.repo";
+import { getOneCrmUniversityConfig, pushLeadToOneCrm } from "@/lib/onecrm";
 
 import fs from "fs";
 import path from "path";
@@ -269,6 +270,43 @@ export async function POST(request, { params }) {
       return err(displayError, 400);
     }
 
+    // Check if university is integrated with OneCRM Lead API
+    const oneCrmConfig = getOneCrmUniversityConfig(lead.university_name);
+
+    if (oneCrmConfig) {
+      const pushRes = await pushLeadToOneCrm(lead, oneCrmConfig);
+
+      if (!pushRes.success) {
+        return err(
+          pushRes.error || `Failed to push lead to ${oneCrmConfig.displayName} CRM`,
+          pushRes.status || 400
+        );
+      }
+
+      if (pushRes.isDuplicate) {
+        await leadsRepo.updateLeadType(id, "Duplicate");
+        await leadsRepo.markAsPushed(id);
+        return ok({
+          success: true,
+          isDuplicate: true,
+          leadType: "Duplicate",
+          message: pushRes.message,
+          data: pushRes.data,
+        });
+      }
+
+      // Successful primary lead push
+      await leadsRepo.updateLeadType(id, "Primary");
+      await leadsRepo.markAsPushed(id);
+      return ok({
+        success: true,
+        isDuplicate: false,
+        leadType: "Primary",
+        message: pushRes.message,
+        data: pushRes.data,
+      });
+    }
+
     // For other universities where API hasn't been configured yet
     return err(
       `Push API for "${lead.university_name || "selected university"}" will be configured soon.`
@@ -277,3 +315,4 @@ export async function POST(request, { params }) {
     return serverError(e);
   }
 }
+
