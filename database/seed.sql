@@ -26,7 +26,8 @@ INSERT IGNORE INTO universities (id, name, location) VALUES
 (3, 'Chandigarh University', 'Chandigarh, Punjab'),
 (4, 'Amity University', 'Noida, Uttar Pradesh'),
 (5, 'Manipal University', 'Manipal, Karnataka'),
-(6, 'Shoolini University', 'Solan, Himachal Pradesh');
+(6, 'Shoolini University', 'Solan, Himachal Pradesh'),
+(15, 'GLA University', 'Mathura, Uttar Pradesh');
 
 -- Courses
 INSERT IGNORE INTO courses (id, university_id, name, duration, fees) VALUES
@@ -38,7 +39,22 @@ INSERT IGNORE INTO courses (id, university_id, name, duration, fees) VALUES
 (6, 3, 'Master of Computer Applications (MCA)', '2 Years', 130000),
 (7, 4, 'Bachelor of Business Administration (BBA)', '3 Years', 110000),
 (8, 5, 'Master of Technology (M.Tech)', '2 Years', 200000),
-(9, 6, 'MBA Online', '2 Years', 150000);
+(9, 6, 'MBA Online', '2 Years', 150000),
+(82, 15, 'BBA - Human Resource Management', '3 Years', NULL),
+(83, 15, 'BBA - Marketing Management', '3 Years', NULL),
+(84, 15, 'BBA - Financial Management', '3 Years', NULL),
+(85, 15, 'BBA - Banking and Insurance', '3 Years', NULL),
+(86, 15, 'BCA - Bachelor of Computer Application', '3 Years', NULL),
+(87, 15, 'B.Com - Bachelor of Commerce', '3 Years', NULL),
+(88, 15, 'MBA - Marketing Management', '2 Years', NULL),
+(89, 15, 'MBA - Human Resource Management', '2 Years', NULL),
+(90, 15, 'MBA - Finance Management', '2 Years', NULL),
+(91, 15, 'MBA - Information Technology Management', '2 Years', NULL),
+(92, 15, 'MBA - Operations Management', '2 Years', NULL),
+(93, 15, 'MBA - Banking and Financial Services', '2 Years', NULL),
+(94, 15, 'MBA - Business Analytics', '2 Years', NULL),
+(95, 15, 'MBA - Supply Chain Management', '2 Years', NULL),
+(96, 15, 'MCA - Masters of Computer Application', '2 Years', NULL);
 
 -- Sample Leads (ON DUPLICATE KEY UPDATE keeps sample data clean on repeated runs)
 INSERT INTO leads (id, student_name, email, phone, university_id, course_id, center_id, subcenter_id, lead_type, status, adm_status) VALUES

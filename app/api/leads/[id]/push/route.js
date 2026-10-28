@@ -8,6 +8,7 @@ import { ok, err, unauthorized, serverError, notFound } from "@/lib/api-response
 import { getSession } from "@/lib/session";
 import * as leadsRepo from "@/repositories/leads.repo";
 import { getOneCrmUniversityConfig, pushLeadToOneCrm } from "@/lib/onecrm";
+import { pushLeadToGla } from "@/lib/gla";
 
 import fs from "fs";
 import path from "path";
@@ -268,6 +269,43 @@ export async function POST(request, { params }) {
         "Failed to push lead to Shoolini University CRM";
 
       return err(displayError, 400);
+    }
+
+    // Check if GLA University
+    const isGla =
+      uniName.includes("gla") ||
+      uniName.includes("gla university") ||
+      uniName.includes("gla online");
+
+    if (isGla) {
+      const pushRes = await pushLeadToGla(lead);
+
+      if (!pushRes.success) {
+        return err(pushRes.error || "Failed to push lead to GLA University CRM", 400);
+      }
+
+      if (pushRes.isDuplicate) {
+        await leadsRepo.updateLeadType(id, "Duplicate");
+        await leadsRepo.markAsPushed(id);
+        return ok({
+          success: true,
+          isDuplicate: true,
+          leadType: "Duplicate",
+          message: pushRes.message,
+          data: pushRes.data,
+        });
+      }
+
+      // Successful primary lead push
+      await leadsRepo.updateLeadType(id, "Primary");
+      await leadsRepo.markAsPushed(id);
+      return ok({
+        success: true,
+        isDuplicate: false,
+        leadType: "Primary",
+        message: pushRes.message,
+        data: pushRes.data,
+      });
     }
 
     // Check if university is integrated with OneCRM Lead API
