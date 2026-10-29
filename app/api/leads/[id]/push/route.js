@@ -9,6 +9,7 @@ import { getSession } from "@/lib/session";
 import * as leadsRepo from "@/repositories/leads.repo";
 import { getOneCrmUniversityConfig, pushLeadToOneCrm } from "@/lib/onecrm";
 import { pushLeadToGla } from "@/lib/gla";
+import { isManipalUniversity, pushLeadToManipal } from "@/lib/manipal";
 
 import fs from "fs";
 import path from "path";
@@ -282,6 +283,38 @@ export async function POST(request, { params }) {
 
       if (!pushRes.success) {
         return err(pushRes.error || "Failed to push lead to GLA University CRM", 400);
+      }
+
+      if (pushRes.isDuplicate) {
+        await leadsRepo.updateLeadType(id, "Duplicate");
+        await leadsRepo.markAsPushed(id);
+        return ok({
+          success: true,
+          isDuplicate: true,
+          leadType: "Duplicate",
+          message: pushRes.message,
+          data: pushRes.data,
+        });
+      }
+
+      // Successful primary lead push
+      await leadsRepo.updateLeadType(id, "Primary");
+      await leadsRepo.markAsPushed(id);
+      return ok({
+        success: true,
+        isDuplicate: false,
+        leadType: "Primary",
+        message: pushRes.message,
+        data: pushRes.data,
+      });
+    }
+
+    // Check if Manipal University (MUJ / SMU / Online Manipal)
+    if (isManipalUniversity(lead.university_name)) {
+      const pushRes = await pushLeadToManipal(lead);
+
+      if (!pushRes.success) {
+        return err(pushRes.error || "Failed to push lead to Online Manipal CRM", 400);
       }
 
       if (pushRes.isDuplicate) {
