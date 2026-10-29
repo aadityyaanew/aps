@@ -2,6 +2,7 @@
 /**
  * SubcentersTable.jsx — Table listing associates / subcenters.
  * Used in both admin panel (all associates) and center panel (own associates).
+ * Fully mobile responsive with smooth touch horizontal scroll.
  */
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
@@ -22,7 +23,7 @@ export default function SubcentersTable({
   if (isLoading) return <Card><LoadingSpinner /></Card>;
   if (!subcenters?.length) {
     return (
-      <Card>
+      <Card className="border border-slate-200/80 shadow-sm overflow-hidden">
         <EmptyState title="No associates yet" description="Add your first associate to start tracking leads." />
       </Card>
     );
@@ -31,50 +32,50 @@ export default function SubcentersTable({
   const hasActions = Boolean(onEdit || onToggleActive || onDelete);
 
   return (
-    <Card>
+    <Card className="border border-slate-200/80 shadow-sm overflow-hidden">
       <div className="overflow-x-auto">
-        <Table>
+        <Table className="min-w-[760px]">
           <TableHeader>
-            <TableRow className="bg-gray-50/50">
-              <TableHead>Associate Name</TableHead>
-              <TableHead>Organization</TableHead>
-              <TableHead>Email (Login)</TableHead>
-              <TableHead>Phone</TableHead>
-              {showCenter && <TableHead>Parent Unit</TableHead>}
-              <TableHead>Punched Leads</TableHead>
-              <TableHead>Status</TableHead>
-              {hasActions && <TableHead className="text-right">Actions</TableHead>}
+            <TableRow className="bg-slate-50/70 border-b border-slate-200">
+              <TableHead className="font-semibold text-slate-700">Associate Name</TableHead>
+              <TableHead className="font-semibold text-slate-700">Organization</TableHead>
+              <TableHead className="font-semibold text-slate-700">Email (Login)</TableHead>
+              <TableHead className="font-semibold text-slate-700">Phone</TableHead>
+              {showCenter && <TableHead className="font-semibold text-slate-700">Parent Unit</TableHead>}
+              <TableHead className="font-semibold text-slate-700">Punched Leads</TableHead>
+              <TableHead className="font-semibold text-slate-700">Status</TableHead>
+              {hasActions && <TableHead className="font-semibold text-slate-700 text-right pr-4">Actions</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
             {subcenters.map((s) => (
-              <TableRow key={s.id} className="hover:bg-gray-50/50">
-                <TableCell className="font-medium text-gray-900">{s.name}</TableCell>
-                <TableCell className="text-sm text-gray-600">{s.organization_name ?? "—"}</TableCell>
-                <TableCell className="text-sm font-mono text-[#8B0000]">{s.email}</TableCell>
-                <TableCell className="text-sm">{s.phone ?? "—"}</TableCell>
+              <TableRow key={s.id} className="hover:bg-slate-50/50 transition-colors">
+                <TableCell className="font-semibold text-slate-900 text-xs">{s.name}</TableCell>
+                <TableCell className="text-xs text-slate-600">{s.organization_name ?? "—"}</TableCell>
+                <TableCell className="text-xs font-mono text-[#8B0000]">{s.email}</TableCell>
+                <TableCell className="text-xs text-slate-700">{s.phone ?? "—"}</TableCell>
                 {showCenter && (
-                  <TableCell className="text-sm font-medium text-slate-800">
+                  <TableCell className="text-xs font-medium text-slate-800">
                     {s.center_name ?? "—"}
                   </TableCell>
                 )}
                 <TableCell>
-                  <Badge variant="secondary">{s.lead_count ?? 0}</Badge>
+                  <Badge variant="secondary" className="text-xs">{s.lead_count ?? 0}</Badge>
                 </TableCell>
                 <TableCell>
-                  <Badge variant={s.is_active ? "default" : "destructive"}>
+                  <Badge variant={s.is_active ? "default" : "destructive"} className="text-xs">
                     {s.is_active ? "Active" : "Deactivated"}
                   </Badge>
                 </TableCell>
                 {hasActions && (
-                  <TableCell>
+                  <TableCell className="text-right pr-4">
                     <div className="flex items-center justify-end gap-1">
                       {onEdit && (
                         <Button
                           size="icon"
                           variant="ghost"
                           onClick={() => onEdit(s)}
-                          className="h-8 w-8 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                          className="h-8 w-8 text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                           title="Edit Associate credentials"
                         >
                           <Pencil size={14} />

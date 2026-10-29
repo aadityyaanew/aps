@@ -1,6 +1,7 @@
 "use client";
 /**
  * EditSubcenterDialog.jsx — Modal to edit Associate (Subcenter) details and credentials.
+ * Fully mobile responsive.
  */
 import { useState, useEffect } from "react";
 import {
@@ -89,7 +90,7 @@ export default function EditSubcenterDialog({
               <Users size={20} />
             </div>
             <div>
-              <DialogTitle className="text-lg font-semibold text-gray-900">
+              <DialogTitle className="text-base sm:text-lg font-semibold text-gray-900">
                 Edit Associate & Credentials
               </DialogTitle>
               <DialogDescription className="text-xs text-gray-500">
@@ -137,7 +138,7 @@ export default function EditSubcenterDialog({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="asc-phone">Phone</Label>
               <Input

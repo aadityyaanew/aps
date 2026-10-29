@@ -2,13 +2,14 @@
 /**
  * BillingAuthGate.jsx — Handles first-time billing password creation,
  * subsequent password verification, and session unlocking.
+ * Fully mobile responsive.
  */
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ShieldCheck, Lock, KeyRound, Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
+import { Lock, KeyRound, Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
 
 export default function BillingAuthGate({ unitId, hasPassword, onUnlocked, children }) {
   const [isUnlocked, setIsUnlocked] = useState(() => {
@@ -116,21 +117,21 @@ export default function BillingAuthGate({ unitId, hasPassword, onUnlocked, child
   // If unit has no password set yet -> First-time setup
   if (!effectiveHasPassword) {
     return (
-      <div className="max-w-md mx-auto my-12">
+      <div className="max-w-md mx-auto my-6 sm:my-12 px-2 sm:px-0">
         <Card className="border-slate-200 shadow-sm">
-          <CardHeader className="text-center pb-2">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-700 mb-3 border border-red-100 shadow-2xs">
-              <KeyRound size={28} />
+          <CardHeader className="text-center pb-2 px-4 sm:px-6">
+            <div className="mx-auto flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-red-50 text-red-700 mb-2 sm:mb-3 border border-red-100 shadow-2xs">
+              <KeyRound size={26} />
             </div>
-            <CardTitle className="text-xl font-bold text-slate-900">
+            <CardTitle className="text-lg sm:text-xl font-bold text-slate-900">
               Create Billing Password
             </CardTitle>
             <CardDescription className="text-xs text-slate-500 max-w-xs mx-auto">
               Welcome to the Billing Section. Set your confidential Billing Password to protect invoices and payment records.
             </CardDescription>
           </CardHeader>
-          <CardContent className="pt-4">
-            <form onSubmit={handleCreatePassword} className="space-y-4">
+          <CardContent className="pt-3 px-4 sm:px-6">
+            <form onSubmit={handleCreatePassword} className="space-y-3.5 sm:space-y-4">
               <div className="space-y-1.5">
                 <Label htmlFor="new-password">New Billing Password</Label>
                 <div className="relative">
@@ -140,13 +141,13 @@ export default function BillingAuthGate({ unitId, hasPassword, onUnlocked, child
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter unique billing password"
-                    className="pr-10"
+                    className="pr-10 text-base sm:text-sm"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer p-1"
                   >
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
@@ -161,6 +162,7 @@ export default function BillingAuthGate({ unitId, hasPassword, onUnlocked, child
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Re-enter password"
+                  className="text-base sm:text-sm"
                   required
                 />
               </div>
@@ -193,21 +195,21 @@ export default function BillingAuthGate({ unitId, hasPassword, onUnlocked, child
 
   // Subsequent visit: Password Verification Gate
   return (
-    <div className="max-w-md mx-auto my-12">
+    <div className="max-w-md mx-auto my-6 sm:my-12 px-2 sm:px-0">
       <Card className="border-slate-200 shadow-sm">
-        <CardHeader className="text-center pb-2">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-700 mb-3 border border-red-100 shadow-2xs">
-            <Lock size={28} />
+        <CardHeader className="text-center pb-2 px-4 sm:px-6">
+          <div className="mx-auto flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-red-50 text-red-700 mb-2 sm:mb-3 border border-red-100 shadow-2xs">
+            <Lock size={26} />
           </div>
-          <CardTitle className="text-xl font-bold text-slate-900">
+          <CardTitle className="text-lg sm:text-xl font-bold text-slate-900">
             Billing Security Verification
           </CardTitle>
           <CardDescription className="text-xs text-slate-500 max-w-xs mx-auto">
             Please enter your unit&apos;s Billing Password to access invoices and records.
           </CardDescription>
         </CardHeader>
-        <CardContent className="pt-4">
-          <form onSubmit={handleVerifyPassword} className="space-y-4">
+        <CardContent className="pt-3 px-4 sm:px-6">
+          <form onSubmit={handleVerifyPassword} className="space-y-3.5 sm:space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="verify-password">Billing Password</Label>
               <div className="relative">
@@ -217,14 +219,14 @@ export default function BillingAuthGate({ unitId, hasPassword, onUnlocked, child
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter billing password"
-                  className="pr-10"
+                  className="pr-10 text-base sm:text-sm"
                   autoFocus
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer p-1"
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>

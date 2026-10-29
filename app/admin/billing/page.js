@@ -7,6 +7,7 @@
  * - Approval & Rejection workflow with remarks
  * - Unit Billing Access control (grant/revoke) and password reset
  * - Broadcast notifications (announcements, instructions, reminders)
+ * - 100% mobile responsive tabs, tables, and actions
  */
 import { useState } from "react";
 import useSWR from "swr";
@@ -17,7 +18,7 @@ import UploadInvoiceDialog from "@/components/billing/UploadInvoiceDialog";
 import SendNotificationDialog from "@/components/billing/SendNotificationDialog";
 import UnitBillingAccessTable from "@/components/billing/UnitBillingAccessTable";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   ReceiptText,
@@ -26,8 +27,6 @@ import {
   ShieldCheck,
   CheckCircle2,
   AlertCircle,
-  FileSpreadsheet,
-  Clock,
 } from "lucide-react";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 
@@ -81,33 +80,35 @@ export default function AdminBillingPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-6">
       <PageHeader
         title="Billing Management"
         description="Monitor unit invoices, review submissions, control billing access, and broadcast announcements."
         action={
-          <div className="flex items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               variant="outline"
+              size="sm"
               onClick={() => setOpenNotify(true)}
-              className="gap-1.5 text-xs border-slate-300 text-slate-700 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200"
+              className="gap-1.5 text-xs border-slate-300 text-slate-700 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 h-9"
             >
               <Megaphone size={15} />
-              Send Notification
+              <span>Send Notification</span>
             </Button>
 
             <Button
+              size="sm"
               onClick={() => setOpenUpload(true)}
-              className="gap-2 bg-[#800000] hover:bg-[#6c0000] text-white shadow-sm"
+              className="gap-2 bg-[#800000] hover:bg-[#6c0000] text-white shadow-sm h-9"
             >
               <Upload size={16} />
-              Upload Invoice
+              <span>Upload Invoice</span>
             </Button>
           </div>
         }
       />
 
-      {/* Admin Summary Cards (Requirement 7) */}
+      {/* Admin Summary Cards */}
       <AdminBillingSummary summary={summary} isLoading={summaryLoading} />
 
       {banner && (
@@ -128,55 +129,56 @@ export default function AdminBillingPage() {
           </div>
           <button
             onClick={() => setBanner(null)}
-            className="text-slate-400 hover:text-slate-700 cursor-pointer ml-3"
+            className="text-slate-400 hover:text-slate-700 cursor-pointer ml-3 p-1"
+            aria-label="Dismiss banner"
           >
             ✕
           </button>
         </div>
       )}
 
-      {/* Tabs Bar */}
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
+      {/* Tabs Bar with mobile horizontal scroll */}
+      <div className="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto scrollbar-none flex-nowrap">
         <Button
           variant={activeTab === "invoices" ? "default" : "ghost"}
           size="sm"
           onClick={() => setActiveTab("invoices")}
-          className={`gap-1.5 text-xs font-semibold ${
+          className={`gap-1.5 text-xs font-semibold shrink-0 h-8 sm:h-9 ${
             activeTab === "invoices"
               ? "bg-[#800000] hover:bg-[#6c0000] text-white"
               : "text-slate-600 hover:bg-slate-100"
           }`}
         >
           <ReceiptText size={15} />
-          All Invoices ({invoices.length})
+          <span>All Invoices ({invoices.length})</span>
         </Button>
 
         <Button
           variant={activeTab === "units" ? "default" : "ghost"}
           size="sm"
           onClick={() => setActiveTab("units")}
-          className={`gap-1.5 text-xs font-semibold ${
+          className={`gap-1.5 text-xs font-semibold shrink-0 h-8 sm:h-9 ${
             activeTab === "units"
               ? "bg-[#800000] hover:bg-[#6c0000] text-white"
               : "text-slate-600 hover:bg-slate-100"
           }`}
         >
           <ShieldCheck size={15} />
-          Unit Access & Passwords ({units.filter((u) => u.billing_access).length}/{units.length} Authorized)
+          <span>Unit Access ({units.filter((u) => u.billing_access).length}/{units.length})</span>
         </Button>
 
         <Button
           variant={activeTab === "notifications" ? "default" : "ghost"}
           size="sm"
           onClick={() => setActiveTab("notifications")}
-          className={`gap-1.5 text-xs font-semibold ${
+          className={`gap-1.5 text-xs font-semibold shrink-0 h-8 sm:h-9 ${
             activeTab === "notifications"
               ? "bg-[#800000] hover:bg-[#6c0000] text-white"
               : "text-slate-600 hover:bg-slate-100"
           }`}
         >
           <Megaphone size={15} />
-          Broadcast History
+          <span>Broadcast History</span>
         </Button>
       </div>
 
@@ -203,7 +205,7 @@ export default function AdminBillingPage() {
       {/* Tab 3: Notification Broadcasts History */}
       {activeTab === "notifications" && (
         <Card className="border border-slate-200/80 shadow-sm overflow-hidden">
-          <div className="p-4 border-b bg-white flex items-center justify-between">
+          <div className="p-3.5 sm:p-4 border-b bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h3 className="text-sm font-semibold text-slate-800">Billing Broadcasts</h3>
               <p className="text-xs text-slate-500">
@@ -213,7 +215,7 @@ export default function AdminBillingPage() {
             <Button
               size="sm"
               onClick={() => setOpenNotify(true)}
-              className="bg-[#800000] hover:bg-[#6c0000] text-white text-xs gap-1.5"
+              className="bg-[#800000] hover:bg-[#6c0000] text-white text-xs gap-1.5 self-start sm:self-auto"
             >
               <Megaphone size={14} />
               New Broadcast
@@ -223,7 +225,7 @@ export default function AdminBillingPage() {
           {notifsLoading ? (
             <LoadingSpinner />
           ) : notifications.length === 0 ? (
-            <div className="p-12 text-center text-slate-400">
+            <div className="p-8 sm:p-12 text-center text-slate-400">
               <Megaphone size={32} className="mx-auto mb-2 text-slate-300" />
               <p className="text-sm font-semibold text-slate-700">No Broadcasts Sent Yet</p>
               <p className="text-xs text-slate-400 mt-1">
@@ -233,15 +235,15 @@ export default function AdminBillingPage() {
           ) : (
             <div className="divide-y divide-slate-100">
               {notifications.map((n) => (
-                <div key={n.id} className="p-4 hover:bg-slate-50/50 transition-colors">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2">
+                <div key={n.id} className="p-3.5 sm:p-4 hover:bg-slate-50/50 transition-colors">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <Badge variant="outline" className="text-xs capitalize font-semibold">
                         {n.type}
                       </Badge>
                       <h4 className="text-sm font-bold text-slate-900">{n.title}</h4>
                     </div>
-                    <span className="text-xs text-slate-400">
+                    <span className="text-[11px] sm:text-xs text-slate-400">
                       {new Date(n.created_at).toLocaleString("en-IN", {
                         day: "numeric",
                         month: "short",
@@ -254,7 +256,7 @@ export default function AdminBillingPage() {
 
                   <p className="text-xs text-slate-600 mt-2 whitespace-pre-wrap">{n.message}</p>
 
-                  <div className="flex items-center gap-4 mt-3 text-[11px] text-slate-400">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-3 text-[11px] text-slate-400">
                     <span>Target: {n.target_all_units ? "All Authorized Units" : "Specific Units"}</span>
                     <span>•</span>
                     <span>Sent to: {n.total_recipients || 0} units</span>

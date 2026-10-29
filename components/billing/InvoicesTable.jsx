@@ -4,6 +4,7 @@
  * Matches existing Leads Listing design system (Card container, filters, badges, clean table).
  * Columns: Invoice Number, Invoice Date, Month & Year, Amount, Signed By,
  * Uploaded Document, Submission Date, Status, Admin Remarks, Action.
+ * Fully mobile responsive with horizontal touch scrolling and min-width preservation.
  */
 import { useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -16,12 +17,10 @@ import {
   Search,
   RotateCcw,
   ExternalLink,
-  Download,
   FileText,
   Clock,
   CheckCircle2,
   XCircle,
-  FileCheck,
 } from "lucide-react";
 import EmptyState from "@/components/common/EmptyState";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
@@ -118,8 +117,8 @@ export default function InvoicesTable({
     <>
       <Card className="border border-slate-200/80 shadow-sm overflow-hidden">
         {/* Filters Bar matching LeadFilters design */}
-        <div className="p-4 border-b bg-white">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        <div className="p-3.5 sm:p-4 border-b bg-white">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3">
             {/* Search Input */}
             <div className="relative">
               <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -221,7 +220,7 @@ export default function InvoicesTable({
           />
         ) : (
           <div className="overflow-x-auto">
-            <Table>
+            <Table className="min-w-[920px]">
               <TableHeader>
                 <TableRow className="bg-slate-50/70 border-b border-slate-200">
                   <TableHead className="font-semibold text-slate-700">Invoice Number</TableHead>

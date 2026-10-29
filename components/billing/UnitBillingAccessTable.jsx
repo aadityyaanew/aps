@@ -1,6 +1,7 @@
 "use client";
 /**
  * UnitBillingAccessTable.jsx — Admin table for controlling billing access and passwords per unit.
+ * Fully mobile responsive with smooth touch scrolling.
  */
 import { useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -9,12 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
-  ShieldCheck,
-  ShieldAlert,
   KeyRound,
   Search,
-  Check,
-  X,
   Loader2,
   Lock,
   Unlock,
@@ -60,7 +57,7 @@ export default function UnitBillingAccessTable({ units = [], isLoading = false, 
   return (
     <>
       <Card className="border border-slate-200/80 shadow-sm overflow-hidden">
-        <div className="p-4 border-b bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="p-3.5 sm:p-4 border-b bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h3 className="text-sm font-semibold text-slate-800">Unit Billing Access & Security</h3>
             <p className="text-xs text-slate-500">
@@ -84,7 +81,7 @@ export default function UnitBillingAccessTable({ units = [], isLoading = false, 
           <EmptyState title="No Units Found" description="No units match the search query." />
         ) : (
           <div className="overflow-x-auto">
-            <Table>
+            <Table className="min-w-[760px]">
               <TableHeader>
                 <TableRow className="bg-slate-50/70 border-b border-slate-200">
                   <TableHead className="font-semibold text-slate-700">Unit Name</TableHead>

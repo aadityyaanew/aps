@@ -1,6 +1,7 @@
 "use client";
 /**
- * components/auth/LoginForm.jsx — Recreates reference UI/UX with APS branding
+ * components/auth/LoginForm.jsx — Recreates reference UI/UX with APS branding.
+ * Fully mobile responsive and optimized for mobile touch targets & iOS input zoom prevention.
  */
 import { useState } from "react";
 import { signIn } from "next-auth/react";
@@ -45,16 +46,16 @@ export default function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
       {/* Error alert matching screenshot banner */}
       {error && (
-        <div className="rounded-2xl bg-red-50 border border-red-200 py-3 px-4 text-center animate-in fade-in duration-200">
-          <p className="text-sm font-medium text-red-600">{error}</p>
+        <div className="rounded-2xl bg-red-50 border border-red-200 py-2.5 sm:py-3 px-3 sm:px-4 text-center animate-in fade-in duration-200">
+          <p className="text-xs sm:text-sm font-medium text-red-600">{error}</p>
         </div>
       )}
 
       {/* Email Field */}
-      <div className="space-y-1.5 text-left">
+      <div className="space-y-1 sm:space-y-1.5 text-left">
         <label
           htmlFor="login-email"
           className="block text-xs font-semibold text-gray-700"
@@ -75,13 +76,13 @@ export default function LoginForm() {
             autoComplete="email"
             disabled={loading}
             required
-            className="w-full h-[50px] pl-11 pr-4 rounded-2xl bg-white border border-gray-200 text-sm text-gray-900 placeholder-gray-400 transition-all outline-none focus:border-[#8B0000] focus:ring-4 focus:ring-[#8B0000]/10 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full h-[48px] sm:h-[50px] pl-11 pr-4 rounded-xl sm:rounded-2xl bg-white border border-gray-200 text-base sm:text-sm text-gray-900 placeholder-gray-400 transition-all outline-none focus:border-[#8B0000] focus:ring-4 focus:ring-[#8B0000]/10 disabled:opacity-60 disabled:cursor-not-allowed"
           />
         </div>
       </div>
 
       {/* Password Field */}
-      <div className="space-y-1.5 text-left">
+      <div className="space-y-1 sm:space-y-1.5 text-left">
         <label
           htmlFor="login-password"
           className="block text-xs font-semibold text-gray-700"
@@ -102,13 +103,13 @@ export default function LoginForm() {
             autoComplete="current-password"
             disabled={loading}
             required
-            className="w-full h-[50px] pl-11 pr-12 rounded-2xl bg-white border border-gray-200 text-sm text-gray-900 placeholder-gray-400 transition-all outline-none focus:border-[#8B0000] focus:ring-4 focus:ring-[#8B0000]/10 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full h-[48px] sm:h-[50px] pl-11 pr-12 rounded-xl sm:rounded-2xl bg-white border border-gray-200 text-base sm:text-sm text-gray-900 placeholder-gray-400 transition-all outline-none focus:border-[#8B0000] focus:ring-4 focus:ring-[#8B0000]/10 disabled:opacity-60 disabled:cursor-not-allowed"
           />
           <button
             type="button"
             onClick={() => setShowPass(!showPass)}
             aria-label={showPass ? "Hide password" : "Show password"}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 transition-colors rounded-full focus:outline-none"
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-full focus:outline-none"
           >
             {showPass ? (
               <EyeOff size={18} strokeWidth={1.75} />
@@ -120,11 +121,11 @@ export default function LoginForm() {
       </div>
 
       {/* Submit Button matching red rounded pill in reference */}
-      <div className="pt-2">
+      <div className="pt-1.5 sm:pt-2">
         <button
           type="submit"
           disabled={loading}
-          className="w-full h-[52px] rounded-2xl bg-gradient-to-r from-[#9e1320] via-[#8B0000] to-[#750000] hover:from-[#b01625] hover:to-[#860000] active:scale-[0.99] text-white text-[15px] font-semibold tracking-wide transition-all shadow-lg shadow-red-950/30 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
+          className="w-full h-[48px] sm:h-[52px] rounded-xl sm:rounded-2xl bg-gradient-to-r from-[#9e1320] via-[#8B0000] to-[#750000] hover:from-[#b01625] hover:to-[#860000] active:scale-[0.99] text-white text-[14px] sm:text-[15px] font-semibold tracking-wide transition-all shadow-lg shadow-red-950/30 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
         >
           {loading && <Loader2 size={18} className="animate-spin" />}
           <span>{loading ? "Signing in..." : "Sign In to Portal"}</span>

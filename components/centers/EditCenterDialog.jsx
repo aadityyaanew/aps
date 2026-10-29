@@ -1,6 +1,7 @@
 "use client";
 /**
  * EditCenterDialog.jsx — Modal for Super Admin to edit Unit details and credentials.
+ * Fully mobile responsive with responsive form grid and scrolling.
  */
 import { useState, useEffect } from "react";
 import {
@@ -91,7 +92,7 @@ export default function EditCenterDialog({ open, onClose, onSubmit, center }) {
               <Building2 size={20} />
             </div>
             <div>
-              <DialogTitle className="text-lg font-semibold text-gray-900">
+              <DialogTitle className="text-base sm:text-lg font-semibold text-gray-900">
                 Edit Unit & Credentials
               </DialogTitle>
               <DialogDescription className="text-xs text-gray-500">
@@ -139,7 +140,7 @@ export default function EditCenterDialog({ open, onClose, onSubmit, center }) {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="unit-phone">Phone</Label>
               <Input

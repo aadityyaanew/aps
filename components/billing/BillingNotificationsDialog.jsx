@@ -2,8 +2,9 @@
 /**
  * BillingNotificationsDialog.jsx — Modal to display billing notifications, announcements,
  * instructions, reminders, and unread counts for units.
+ * Fully mobile responsive.
  */
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import useSWR from "swr";
 import {
   Dialog,
@@ -27,7 +28,7 @@ import {
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
 export default function BillingNotificationsDialog({ open, onClose, onReadUpdated }) {
-  const { data, error, isLoading, mutate } = useSWR(
+  const { data, isLoading, mutate } = useSWR(
     open ? "/api/billing/notifications" : null,
     fetcher,
     { revalidateOnFocus: true }
@@ -104,18 +105,18 @@ export default function BillingNotificationsDialog({ open, onClose, onReadUpdate
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-xl max-h-[85vh] flex flex-col p-0 overflow-hidden">
-        <DialogHeader className="p-5 pb-3 border-b border-slate-100 bg-slate-50/50">
-          <div className="flex items-center justify-between">
+        <DialogHeader className="p-3.5 sm:p-5 pb-3 border-b border-slate-100 bg-slate-50/50">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-100/80 text-red-700">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-100/80 text-red-700 shrink-0">
                 <Bell size={18} />
               </div>
-              <div>
-                <DialogTitle className="text-base font-semibold text-slate-900">
+              <div className="min-w-0">
+                <DialogTitle className="text-base font-semibold text-slate-900 truncate">
                   Billing Notifications
                 </DialogTitle>
-                <DialogDescription className="text-xs text-slate-500">
-                  Announcements, instructions, and reminders from the Administration
+                <DialogDescription className="text-xs text-slate-500 truncate">
+                  Announcements and instructions from Administration
                 </DialogDescription>
               </div>
             </div>
@@ -126,7 +127,7 @@ export default function BillingNotificationsDialog({ open, onClose, onReadUpdate
                 size="sm"
                 onClick={handleMarkAllAsRead}
                 disabled={markingAll}
-                className="text-xs h-8 gap-1.5 border-slate-200 text-slate-700 hover:bg-slate-100"
+                className="text-xs h-8 gap-1.5 border-slate-200 text-slate-700 hover:bg-slate-100 self-start sm:self-auto shrink-0"
               >
                 {markingAll ? <Loader2 size={13} className="animate-spin" /> : <CheckCheck size={14} />}
                 Mark all read
@@ -135,7 +136,7 @@ export default function BillingNotificationsDialog({ open, onClose, onReadUpdate
           </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto p-5 space-y-3 divide-y divide-slate-100">
+        <div className="flex-1 overflow-y-auto p-3.5 sm:p-5 space-y-3 divide-y divide-slate-100">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-2">
               <Loader2 size={24} className="animate-spin text-red-600" />
@@ -158,23 +159,23 @@ export default function BillingNotificationsDialog({ open, onClose, onReadUpdate
                 <div
                   key={notif.notification_id}
                   onClick={() => isUnread && handleMarkSingleRead(notif.notification_id)}
-                  className={`pt-3 first:pt-0 transition-all rounded-lg p-3 ${
+                  className={`pt-3 first:pt-0 transition-all rounded-lg p-2.5 sm:p-3 ${
                     isUnread
                       ? "bg-red-50/40 border border-red-100/80 cursor-pointer hover:bg-red-50/70"
                       : "bg-white hover:bg-slate-50/60"
                   }`}
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded-md bg-white border border-slate-200 shadow-2xs">
+                  <div className="flex items-start justify-between gap-2.5">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="p-1.5 rounded-md bg-white border border-slate-200 shadow-2xs shrink-0">
                         {getTypeIcon(notif.type)}
                       </div>
-                      <span className="font-semibold text-sm text-slate-900">
+                      <span className="font-semibold text-xs sm:text-sm text-slate-900 truncate">
                         {notif.title}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-1.5 shrink-0">
                       {getTypeBadge(notif.type)}
                       {isUnread && (
                         <span className="h-2 w-2 rounded-full bg-red-600" title="Unread" />
@@ -182,11 +183,11 @@ export default function BillingNotificationsDialog({ open, onClose, onReadUpdate
                     </div>
                   </div>
 
-                  <p className="text-xs text-slate-600 mt-2 whitespace-pre-wrap leading-relaxed pl-9">
+                  <p className="text-xs text-slate-600 mt-2 whitespace-pre-wrap leading-relaxed pl-8 sm:pl-9">
                     {notif.message}
                   </p>
 
-                  <div className="flex items-center justify-between mt-3 pl-9 text-[11px] text-slate-400">
+                  <div className="flex items-center justify-between mt-2.5 pl-8 sm:pl-9 text-[11px] text-slate-400">
                     <span>
                       {new Date(notif.created_at).toLocaleString("en-IN", {
                         day: "numeric",
@@ -198,7 +199,7 @@ export default function BillingNotificationsDialog({ open, onClose, onReadUpdate
                     </span>
                     {isUnread && (
                       <span className="text-[11px] font-medium text-red-600">
-                        Click to mark read
+                        Tap to mark read
                       </span>
                     )}
                   </div>

@@ -4,6 +4,7 @@
  * - Shows Lead Type badge (Under Review, Primary, Duplicate).
  * - If Super Admin (isAdmin=true), status and ADM status are interactive dropdowns to edit live.
  * - If Center/Subcenter, status and ADM status are read-only badges.
+ * - 100% mobile responsive with smooth horizontal touch-scrolling.
  */
 import { useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -146,7 +147,7 @@ export default function LeadsTable({
 
   return (
     <Card className="border border-slate-200/80 shadow-sm overflow-hidden">
-      <div className="p-4 border-b bg-white">
+      <div className="p-3.5 sm:p-4 border-b bg-white">
         <LeadFilters
           search={search}
           onSearchChange={setSearch}
@@ -170,7 +171,7 @@ export default function LeadsTable({
 
       {banner && (
         <div
-          className={`flex items-center justify-between px-4 py-2.5 text-xs font-medium border-b ${
+          className={`flex items-center justify-between px-3.5 sm:px-4 py-2.5 text-xs font-medium border-b ${
             banner.type === "success"
               ? "bg-emerald-50 text-emerald-800 border-emerald-200"
               : banner.type === "warning"
@@ -186,11 +187,12 @@ export default function LeadsTable({
             ) : (
               <AlertTriangle size={15} className="text-red-600 shrink-0" />
             )}
-            <span>{banner.text}</span>
+            <span className="text-xs">{banner.text}</span>
           </div>
           <button
             onClick={() => setBanner(null)}
-            className="text-slate-400 hover:text-slate-700 cursor-pointer ml-2"
+            className="text-slate-400 hover:text-slate-700 cursor-pointer ml-2 p-1"
+            aria-label="Dismiss banner"
           >
             <X size={13} />
           </button>
@@ -203,7 +205,7 @@ export default function LeadsTable({
         <EmptyState title="No leads found" description="Try adjusting your search or add a new lead." />
       ) : (
         <div className="overflow-x-auto">
-          <Table>
+          <Table className="min-w-[920px]">
             <TableHeader>
               <TableRow className="bg-slate-50/70 border-b border-slate-200">
                 <TableHead className="font-semibold text-slate-700">Student</TableHead>

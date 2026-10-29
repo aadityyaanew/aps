@@ -1,6 +1,7 @@
 "use client";
 /**
  * CentersTable.jsx — Table of all units / centers (admin view).
+ * Fully mobile responsive with horizontal scroll and touch-friendly controls.
  */
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
@@ -17,30 +18,30 @@ export default function CentersTable({ centers, isLoading, onEdit, onToggleActiv
   }
 
   return (
-    <Card>
+    <Card className="border border-slate-200/80 shadow-sm overflow-hidden">
       <div className="overflow-x-auto">
-        <Table>
+        <Table className="min-w-[760px]">
           <TableHeader>
-            <TableRow className="bg-gray-50/50">
-              <TableHead>Unit Name</TableHead>
-              <TableHead>Organization</TableHead>
-              <TableHead>Email (Login)</TableHead>
-              <TableHead>Phone</TableHead>
-              <TableHead>Associates</TableHead>
-              <TableHead>Billing</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+            <TableRow className="bg-slate-50/70 border-b border-slate-200">
+              <TableHead className="font-semibold text-slate-700">Unit Name</TableHead>
+              <TableHead className="font-semibold text-slate-700">Organization</TableHead>
+              <TableHead className="font-semibold text-slate-700">Email (Login)</TableHead>
+              <TableHead className="font-semibold text-slate-700">Phone</TableHead>
+              <TableHead className="font-semibold text-slate-700">Associates</TableHead>
+              <TableHead className="font-semibold text-slate-700">Billing</TableHead>
+              <TableHead className="font-semibold text-slate-700">Status</TableHead>
+              <TableHead className="font-semibold text-slate-700 text-right pr-4">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {centers.map((c) => (
-              <TableRow key={c.id} className="hover:bg-gray-50/50">
-                <TableCell className="font-medium text-gray-900">{c.name}</TableCell>
-                <TableCell className="text-sm text-gray-600">{c.organization_name ?? "—"}</TableCell>
-                <TableCell className="text-sm font-mono text-[#8B0000]">{c.email}</TableCell>
-                <TableCell className="text-sm">{c.phone ?? "—"}</TableCell>
+              <TableRow key={c.id} className="hover:bg-slate-50/50 transition-colors">
+                <TableCell className="font-semibold text-slate-900 text-xs">{c.name}</TableCell>
+                <TableCell className="text-xs text-slate-600">{c.organization_name ?? "—"}</TableCell>
+                <TableCell className="text-xs font-mono text-[#8B0000]">{c.email}</TableCell>
+                <TableCell className="text-xs text-slate-700">{c.phone ?? "—"}</TableCell>
                 <TableCell>
-                  <Badge variant="secondary">{c.subcenter_count ?? 0}</Badge>
+                  <Badge variant="secondary" className="text-xs">{c.subcenter_count ?? 0}</Badge>
                 </TableCell>
                 <TableCell>
                   <Badge
@@ -55,17 +56,17 @@ export default function CentersTable({ centers, isLoading, onEdit, onToggleActiv
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Badge variant={c.is_active ? "default" : "destructive"}>
+                  <Badge variant={c.is_active ? "default" : "destructive"} className="text-xs">
                     {c.is_active ? "Active" : "Deactivated"}
                   </Badge>
                 </TableCell>
-                <TableCell>
+                <TableCell className="text-right pr-4">
                   <div className="flex items-center justify-end gap-1">
                     <Button
                       size="icon"
                       variant="ghost"
                       onClick={() => onEdit?.(c)}
-                      className="h-8 w-8 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                      className="h-8 w-8 text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                       title="Edit Unit credentials"
                     >
                       <Pencil size={14} />

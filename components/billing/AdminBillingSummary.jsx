@@ -2,6 +2,7 @@
 /**
  * AdminBillingSummary.jsx — Summary metric cards for Admin Billing Dashboard.
  * Total Invoices, Pending Invoices, Approved Invoices, Rejected Invoices, and Total Approved Amount.
+ * Fully mobile responsive.
  */
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -64,7 +65,7 @@ export default function AdminBillingSummary({ summary = {}, isLoading = false })
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
       {cards.map((card, idx) => {
         const Icon = card.icon;
         return (
@@ -72,16 +73,16 @@ export default function AdminBillingSummary({ summary = {}, isLoading = false })
             key={idx}
             className={`border ${card.borderAccent || "border-slate-200"} bg-white shadow-xs hover:shadow-sm transition-all`}
           >
-            <CardContent className="p-4 flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-xs font-medium text-slate-500">{card.label}</p>
-                <p className={`text-xl font-bold tracking-tight ${card.valueColor || "text-slate-900"}`}>
+            <CardContent className="p-3.5 sm:p-4 flex items-center justify-between gap-2">
+              <div className="space-y-1 min-w-0">
+                <p className="text-xs font-medium text-slate-500 truncate">{card.label}</p>
+                <p className={`text-lg sm:text-xl font-bold tracking-tight truncate ${card.valueColor || "text-slate-900"}`}>
                   {isLoading ? "—" : card.value}
                 </p>
-                <p className="text-[11px] text-slate-400">{card.description}</p>
+                <p className="text-[11px] text-slate-400 truncate">{card.description}</p>
               </div>
               <div className={`p-2.5 rounded-xl ${card.iconBg} shrink-0`}>
-                <Icon size={22} />
+                <Icon size={20} className="sm:w-[22px] sm:h-[22px]" />
               </div>
             </CardContent>
           </Card>

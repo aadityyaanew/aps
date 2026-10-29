@@ -14,7 +14,7 @@ import BillingNotificationsDialog from "@/components/billing/BillingNotification
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
-export default function SidebarNav({ role, isCollapsed = false }) {
+export default function SidebarNav({ role, isCollapsed = false, onNavigate }) {
   const pathname = usePathname();
   const [notifOpen, setNotifOpen] = useState(false);
 
@@ -49,6 +49,7 @@ export default function SidebarNav({ role, isCollapsed = false }) {
               <Link
                 href={href}
                 title={isCollapsed ? label : undefined}
+                onClick={() => onNavigate?.()}
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
                   isCollapsed && "justify-center px-2",

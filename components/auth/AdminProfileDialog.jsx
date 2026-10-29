@@ -1,6 +1,7 @@
 "use client";
 /**
  * AdminProfileDialog.jsx — Modal for Super Admin to edit profile & credentials.
+ * Fully mobile responsive.
  */
 import { useState, useEffect } from "react";
 import {
@@ -97,7 +98,7 @@ export default function AdminProfileDialog({ open, onClose, user }) {
               <ShieldCheck size={20} />
             </div>
             <div>
-              <DialogTitle className="text-lg font-semibold text-gray-900">
+              <DialogTitle className="text-base sm:text-lg font-semibold text-gray-900">
                 Super Admin Profile & Credentials
               </DialogTitle>
               <DialogDescription className="text-xs text-gray-500">
@@ -138,7 +139,7 @@ export default function AdminProfileDialog({ open, onClose, user }) {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label htmlFor="admin-phone">Phone</Label>
                 <Input

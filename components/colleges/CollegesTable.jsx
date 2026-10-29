@@ -1,6 +1,7 @@
 "use client";
 /**
  * CollegesTable.jsx — Table listing all colleges/universities (admin view).
+ * Fully mobile responsive with smooth touch horizontal scroll.
  */
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
@@ -14,7 +15,7 @@ export default function CollegesTable({ colleges, isLoading, onEdit, onManageCou
   if (isLoading) return <Card><LoadingSpinner /></Card>;
   if (!colleges?.length) {
     return (
-      <Card>
+      <Card className="border border-slate-200/80 shadow-sm overflow-hidden">
         <EmptyState
           title="No colleges yet"
           description="Add your first college/university to get started."
@@ -24,23 +25,23 @@ export default function CollegesTable({ colleges, isLoading, onEdit, onManageCou
   }
 
   return (
-    <Card>
+    <Card className="border border-slate-200/80 shadow-sm overflow-hidden">
       <div className="overflow-x-auto">
-        <Table>
+        <Table className="min-w-[680px]">
           <TableHeader>
-            <TableRow className="bg-gray-50/50">
-              <TableHead>College / University</TableHead>
-              <TableHead>Location</TableHead>
-              <TableHead>Website</TableHead>
-              <TableHead>Courses</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+            <TableRow className="bg-slate-50/70 border-b border-slate-200">
+              <TableHead className="font-semibold text-slate-700">College / University</TableHead>
+              <TableHead className="font-semibold text-slate-700">Location</TableHead>
+              <TableHead className="font-semibold text-slate-700">Website</TableHead>
+              <TableHead className="font-semibold text-slate-700">Courses</TableHead>
+              <TableHead className="font-semibold text-slate-700 text-right pr-4">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {colleges.map((col) => (
-              <TableRow key={col.id} className="hover:bg-gray-50/50">
-                <TableCell className="font-medium text-gray-900">{col.name}</TableCell>
-                <TableCell className="text-sm text-gray-600">
+              <TableRow key={col.id} className="hover:bg-slate-50/50 transition-colors">
+                <TableCell className="font-semibold text-slate-900 text-xs">{col.name}</TableCell>
+                <TableCell className="text-xs text-slate-600">
                   {col.location ? (
                     <span className="flex items-center gap-1">
                       <MapPin size={12} className="text-slate-400 shrink-0" />
@@ -50,7 +51,7 @@ export default function CollegesTable({ colleges, isLoading, onEdit, onManageCou
                     <span className="text-slate-400">—</span>
                   )}
                 </TableCell>
-                <TableCell className="text-sm">
+                <TableCell className="text-xs">
                   {col.website ? (
                     <a
                       href={col.website}
@@ -68,14 +69,14 @@ export default function CollegesTable({ colleges, isLoading, onEdit, onManageCou
                 <TableCell>
                   <Badge
                     variant="secondary"
-                    className="cursor-pointer hover:bg-slate-200 gap-1"
+                    className="cursor-pointer hover:bg-slate-200 gap-1 text-xs"
                     onClick={() => onManageCourses?.(col)}
                   >
                     <BookOpen size={11} />
                     {col.course_count ?? 0} course{col.course_count !== 1 ? "s" : ""}
                   </Badge>
                 </TableCell>
-                <TableCell>
+                <TableCell className="text-right pr-4">
                   <div className="flex items-center justify-end gap-1">
                     <Button
                       size="icon"
@@ -90,7 +91,7 @@ export default function CollegesTable({ colleges, isLoading, onEdit, onManageCou
                       size="icon"
                       variant="ghost"
                       onClick={() => onEdit?.(col)}
-                      className="h-8 w-8 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                      className="h-8 w-8 text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                       title="Edit College"
                     >
                       <Pencil size={14} />
